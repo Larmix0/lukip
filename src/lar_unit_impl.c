@@ -3,6 +3,7 @@
 
 #include "lar_unit.h"
 #include "lar_unit_impl.h"
+#include "output.h"
 
 #define GROW_CAPACITY(capacity) ((capacity) < 16 ? 16 : (capacity) * 2)
 
@@ -23,6 +24,7 @@ void init_lar_unit() {
 
     larUnit.setUp = NULL;
     larUnit.tearDown = NULL;
+    larUnit.successful = false;
 }
 
 static void init_info(TestInfo *info) {
@@ -39,14 +41,20 @@ static void init_test(TestFunc *test) {
     init_info(&test->info);
 }
 
-static void show_results() {
-    for (int i = 0; i < larUnit.testsLength; i++) {
-        printf("%i\n", larUnit.tests[i].info.status);
+static void free_failure_messages(TestFunc *failedFunc) {
+    for (int i = 0; i < failedFunc->failsLength; i++) {
+        free(failedFunc->failures[i].message);
     }
 }
 
 void end_lar_unit() {
-    show_results();
+    show_results(larUnit);
+    for (int i = 0; i < larUnit.testsLength; i++) {
+        if (larUnit.tests[i].info.status == FAILURE) {
+            free_failure_messages(&larUnit.tests[i]);
+            free(larUnit.tests[i].failures);
+        }
+    }
     free(larUnit.tests);
 }
 
@@ -69,7 +77,7 @@ static void append_failure(const Failure failure) {
             testFunc->failures, testFunc->failsCapacity, sizeof(Failure)
         );
     }
-    testFunc->failures[testFunc->failsLength] = failure;
+    testFunc->failures[testFunc->failsLength++] = failure;
 }
 
 void test_func(const EmptyFunc funcToTest) {
@@ -77,11 +85,9 @@ void test_func(const EmptyFunc funcToTest) {
     init_test(&testFunc);
     append_test(testFunc);
     funcToTest();
-    // add warning about the tested function having no assertion
-    // or iterate in "end_lar_unit" over "unknown" status results and show warning for them.
 }
 
-static void assert_success(const TestInfo newInfo) {
+void assert_success(const TestInfo newInfo) {
     TestInfo *info = &larUnit.tests[larUnit.testsLength - 1].info;
     if (info->status == UNKNOWN) {
         info->fileName = newInfo.fileName;
@@ -90,12 +96,13 @@ static void assert_success(const TestInfo newInfo) {
     }
 }
 
-static void assert_failure(const TestInfo newInfo, const int line, const char *message) {
+void assert_failure(const TestInfo newInfo, const int line, char *message) {
     TestInfo *info = &larUnit.tests[larUnit.testsLength - 1].info;
     if (info->status == UNKNOWN) {
         info->fileName = newInfo.fileName;
         info->funcName = newInfo.funcName;
     }
+    larUnit.successful = false;
     info->status = FAILURE;
     Failure failure = {.line=line, .message=message};
     append_failure(failure);
@@ -103,7 +110,7 @@ static void assert_failure(const TestInfo newInfo, const int line, const char *m
 
 void check_condition(
     const bool conditionResult, char *message,
-    char *fileName, char *funcName, int line
+    char *fileName, char *funcName, const int line
 ) {
     TestInfo info = {.fileName=fileName, .funcName=funcName, .status=UNKNOWN};
     if (conditionResult) {

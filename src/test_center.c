@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdint.h>
+
 #include "lar_unit.h"
 
 void temp_set_up() {
@@ -9,20 +11,45 @@ void temp_tear_down() {
     printf("Tear Down called!\n");
 }
 
-void some_test_func() {
-    printf("This is a test being run!\n");
-    LAR_EQUAL(5, 5);
+void failed_test() {
+    LAR_BOOL_EQUAL(true, false);
+    LAR_INT_EQUAL(5, 5);
+    LAR_INT_EQUAL(5, 6);
+}
+
+void successful_test() {
+    LAR_BOOL_EQUAL(true, true);
+    LAR_INT_EQUAL(5, 5);
+    LAR_INT_EQUAL(2, 2);
+}
+
+void bytes_array_test() {
+    uint8_t bytesArray1[13];
+    uint8_t bytesArray2[13];
+    for (int i = 0; i * 20 < 255; i++) {
+        bytesArray1[i] = i * 20;
+    }
+    for (int i = 0; i * 20 < 255; i++) {
+        bytesArray2[i] = i * 20;
+    }
+    bytesArray2[8] = 9;
+    LAR_BYTES_EQUAL(bytesArray1, bytesArray2, 12);
+}
+
+void string_array_test() {
+    char str1[10] = "string!9", str2[10] = "string!";
+    LAR_STRING_EQUAL(str1, str2);
 }
 
 int main() {
-    printf("%s\n", __func__);
-    printf("%s\n", __FILE__);
-    printf("%i\n", __LINE__);
     LAR_INIT();
     MAKE_SET_UP(temp_set_up);
     MAKE_TEAR_DOWN(temp_tear_down);
 
-    TEST(some_test_func);
+    TEST(failed_test);
+    TEST(successful_test);
+    TEST(bytes_array_test);
+    TEST(string_array_test);
 
     LAR_END();
     return 0;
