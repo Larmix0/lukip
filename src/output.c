@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "lar_unit_impl.h"
+#include "lar_asserts.h"
 
 static void long_line(char ch) {
     for (int i = 0; i < 100; i++) {
@@ -10,10 +10,20 @@ static void long_line(char ch) {
 }
 
 static void show_warnings(LarUnit larUnit) {
+    bool hadWarnings;
     for (int i = 0; i < larUnit.testsLength; i++) {
-        if (larUnit.tests[i].info.status == UNKNOWN) {
-            printf("Warning: function %s had no assertions.\n", larUnit.tests[i].info.funcName);
+        if (larUnit.tests[i].info.status != UNKNOWN) {
+            continue; // no need to warn
         }
+        if (!hadWarnings) {
+            hadWarnings = true;
+        }
+        printf(
+            "[Warning] function %s had no assertions.\n", larUnit.tests[i].info.funcName
+        );
+    }
+    if (hadWarnings) {
+        long_line('=');
     }
 }
 

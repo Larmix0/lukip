@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "lar_unit.h"
+#include "test_two.h"
 
 void temp_set_up() {
     printf("Set Up activated!\n");
@@ -11,9 +12,14 @@ void temp_tear_down() {
     printf("Tear Down called!\n");
 }
 
+void empty_test() {
+    // To see if we get warned for no assertions.
+}
+
 void failed_test() {
     LAR_BOOL_EQUAL(true, false);
-    LAR_INT_EQUAL(5, 5);
+    int8_t five = 5;
+    LAR_INT_EQUAL(five, 5);
     LAR_INT_EQUAL(5, 6);
 }
 
@@ -43,13 +49,16 @@ void string_array_test() {
 
 int main() {
     LAR_INIT();
-    MAKE_SET_UP(temp_set_up);
-    MAKE_TEAR_DOWN(temp_tear_down);
+    MAKE_SET_UP(setUp2);
+    MAKE_TEAR_DOWN(tearDown2);
 
+    TEST(string_array_test2);
     TEST(failed_test);
     TEST(successful_test);
+    TEST(empty_test);
     TEST(bytes_array_test);
     TEST(string_array_test);
+    TEST(string_array_test2);
 
     LAR_END();
     return 0;
