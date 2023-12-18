@@ -1,11 +1,12 @@
 #ifndef LUKIP_ASSERTS_H
 #define LUKIP_ASSERTS_H
 
-#include <stdbool.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "lukip.h"
 
@@ -51,6 +52,7 @@ typedef struct {
 
     EmptyFunc setUp;
     EmptyFunc tearDown;
+    clock_t startTime;
     bool successful;
 } LukipUnit;
 

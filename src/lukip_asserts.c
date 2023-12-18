@@ -50,6 +50,7 @@ void init_lukip() {
 
     lukip.setUp = NULL;
     lukip.tearDown = NULL;
+    lukip.startTime = clock();
     lukip.successful = false;
 }
 

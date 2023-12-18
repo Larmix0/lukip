@@ -17,8 +17,9 @@ static void show_warnings(LukipUnit lukip) {
         }
         hadWarnings = true;
         LineInfo *caller = &lukip.tests[i].caller;
+        printf("[\033[1;33mWARNING\033[0m] ");
         printf(
-            "[\033[1;33mWARNING\033[0m] function called in line %d: %s|%s() had no assertions.\n",
+            "Function called in line %d: %s|%s() had no assertions.\n",
             caller->line, caller->fileName, caller->funcName
         );
     }
@@ -35,8 +36,9 @@ static void errors_info(LukipUnit lukip) {
             continue;
         }
         for (int j = 0; j < test->failsLength; j++) {
+            printf("[\033[1;31mFAIL\033[0m] ");
             printf(
-                "[\033[1;31mFAIL\033[0m] line %d: %s|%s(): \"%s\"\n",
+                "Line %d: %s|%s(): \"%s\"\n",
                 test->failures[j].line,
                 test->info.fileName,
                 test->info.funcName,
@@ -46,7 +48,7 @@ static void errors_info(LukipUnit lukip) {
     }
 }
 
-static void show_fail(LukipUnit lukip) {
+static void show_fail(LukipUnit lukip, double executionTime) {
     int failures = 0;
     for (int i = 0; i < lukip.testsLength; i++) {
         if (lukip.tests[i].info.status == FAILURE) {
@@ -62,25 +64,30 @@ static void show_fail(LukipUnit lukip) {
     long_line('=');
     errors_info(lukip);
     printf(
-        "\nFailed with %i/%i test results in 9999 seconds.\n\nFAIL.\n",
-        lukip.testsLength - failures, lukip.testsLength
+        "\nFailed with %i/%i test results in %.3lf seconds.\n\nFAIL.\n",
+        lukip.testsLength - failures, lukip.testsLength, executionTime
     );
 }
 
-static void show_success(LukipUnit lukip) {
+static void show_success(LukipUnit lukip, double executionTime) {
     for (int i = 0; i < lukip.testsLength; i++) {
         lukip.tests[i].info.status == SUCCESS ? putchar('.') : putchar('?');
     }
-    printf("\nSuccessfully ran %i tests in 9999 seconds.\n\nOK.\n", lukip.testsLength);
+    printf(
+        "\nSuccessfully ran %i tests in %.3lf seconds.\n\nOK.\n", lukip.testsLength, executionTime
+    );
 }
 
 void show_results(LukipUnit lukip) {
     printf("\n\n\n");
     long_line('-');
     show_warnings(lukip);
+
+    clock_t endTime = clock();
+    double executionTime = (double)(endTime - lukip.startTime) / CLOCKS_PER_SEC;
     if (lukip.successful) {
-        show_success(lukip);
+        show_success(lukip, executionTime);
     } else {
-        show_fail(lukip);
+        show_fail(lukip, executionTime);
     }
 }

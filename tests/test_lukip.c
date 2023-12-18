@@ -55,6 +55,13 @@ int main() {
     TEST(string_test2);
     TEST(failed_test);
     TEST(successful_test);
+
+    // waste time
+    for (int i = 0; i < 500000000; i++) {
+        i++;
+        i--;
+    }
+
     TEST(empty_test);
     TEST(bytes_array_test);
     TEST(string_test);
