@@ -18,9 +18,15 @@ typedef enum {
 } TestStatus;
 
 typedef struct {
-    int line;
     char *message;
+    int line;
 } Failure;
+
+typedef struct {
+    char *fileName;
+    char *funcName;
+    int line;
+} LineInfo;
 
 typedef struct {
     TestStatus status;
@@ -33,6 +39,7 @@ typedef struct {
     int failsLength;
     Failure *failures;
 
+    LineInfo caller;
     TestInfo info;
     EmptyFunc testFunc;
 } TestFunc;
@@ -53,7 +60,7 @@ void end_lar_unit();
 void make_set_up(const EmptyFunc newSetUp);
 void make_tear_down(const EmptyFunc newTearDown);
 
-void test_func(const EmptyFunc funcToTest);
+void test_func(const EmptyFunc funcToTest, LineInfo caller);
 
 void assert_bytes_equal(
     void *array1, void *array2, const int length,

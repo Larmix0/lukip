@@ -9,7 +9,7 @@
 #define BUFFER_LENGTH 256
 
 static char buffer[BUFFER_LENGTH];
-LarUnit larUnit;
+static LarUnit larUnit;
 
 static void *reallocate(void *pointer, const int newSize, const size_t elementSize) {
     void *result = realloc(pointer, newSize * elementSize);
@@ -53,8 +53,14 @@ void init_lar_unit() {
     larUnit.successful = false;
 }
 
-static void init_info(TestInfo *info) {
+static void init_test_info(TestInfo *info) {
     info->status = UNKNOWN;
+    info->fileName = NULL;
+    info->funcName = NULL;
+}
+
+static void init_line_info(LineInfo *info) {
+    info->line = 0;
     info->fileName = NULL;
     info->funcName = NULL;
 }
@@ -64,7 +70,8 @@ static void init_test(TestFunc *test) {
     test->failsLength = 0;
     test->failures = NULL;
     test->testFunc = NULL;
-    init_info(&test->info);
+    init_test_info(&test->info);
+    init_line_info(&test->caller);
 }
 
 static void free_failure_messages(TestFunc *failedFunc) {
@@ -106,12 +113,14 @@ static void append_failure(const Failure failure) {
     testFunc->failures[testFunc->failsLength++] = failure;
 }
 
-void test_func(const EmptyFunc funcToTest) {
+void test_func(const EmptyFunc funcToTest, LineInfo caller) {
     if (larUnit.setUp != NULL) {
         larUnit.setUp();
     }
     TestFunc testFunc;
     init_test(&testFunc);
+    testFunc.caller = caller;
+
     append_test(testFunc);
     funcToTest();
     if (larUnit.tearDown != NULL) {

@@ -15,11 +15,11 @@ static void show_warnings(LarUnit larUnit) {
         if (larUnit.tests[i].info.status != UNKNOWN) {
             continue; // no need to warn
         }
-        if (!hadWarnings) {
-            hadWarnings = true;
-        }
+        hadWarnings = true;
+        LineInfo *caller = &larUnit.tests[i].caller;
         printf(
-            "[Warning] function %s had no assertions.\n", larUnit.tests[i].info.funcName
+            "[\033[1;33mWARNING\033[0m] function called in line %d: %s|%s() had no assertions.\n",
+            caller->line, caller->fileName, caller->funcName
         );
     }
     if (hadWarnings) {
@@ -36,10 +36,10 @@ static void errors_info(LarUnit larUnit) {
         }
         for (int j = 0; j < test->failsLength; j++) {
             printf(
-                "in file %s at function %s line %i: %s\n",
+                "[\033[1;31mFAIL\033[0m] line %d: %s|%s(): \"%s\"\n",
+                test->failures[j].line,
                 test->info.fileName,
                 test->info.funcName,
-                test->failures[j].line,
                 test->failures[j].message
             );
         }
