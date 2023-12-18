@@ -1,5 +1,5 @@
-#ifndef LAR_ASSERTS_H
-#define LAR_ASSERTS_H
+#ifndef LUKIP_ASSERTS_H
+#define LUKIP_ASSERTS_H
 
 #include <stdbool.h>
 #include <stdarg.h>
@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lar_unit.h"
+#include "lukip.h"
 
 typedef void (*EmptyFunc)();
 
@@ -52,10 +52,10 @@ typedef struct {
     EmptyFunc setUp;
     EmptyFunc tearDown;
     bool successful;
-} LarUnit;
+} LukipUnit;
 
-void init_lar_unit();
-void end_lar_unit();
+void init_lukip();
+void end_lukip();
 
 void make_set_up(const EmptyFunc newSetUp);
 void make_tear_down(const EmptyFunc newTearDown);

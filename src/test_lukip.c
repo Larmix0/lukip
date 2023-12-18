@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "lar_unit.h"
-#include "test_two.h"
+#include "lukip/lukip.h"
+#include "second_test.h"
 
 void temp_set_up() {
     printf("Set Up activated!\n");
@@ -17,16 +17,16 @@ void empty_test() {
 }
 
 void failed_test() {
-    LAR_BOOL_EQUAL(true, false);
+    LUKIP_BOOL_EQUAL(true, false);
     int8_t five = 5;
-    LAR_INT_EQUAL(five, 5);
-    LAR_INT_EQUAL(5, 6);
+    LUKIP_INT_EQUAL(five, 5);
+    LUKIP_INT_EQUAL(5, 6);
 }
 
 void successful_test() {
-    LAR_BOOL_EQUAL(true, true);
-    LAR_INT_EQUAL(5, 5);
-    LAR_INT_EQUAL(2, 2);
+    LUKIP_BOOL_EQUAL(true, true);
+    LUKIP_INT_EQUAL(5, 5);
+    LUKIP_INT_EQUAL(2, 2);
 }
 
 void bytes_array_test() {
@@ -39,27 +39,27 @@ void bytes_array_test() {
         bytesArray2[i] = i * 20;
     }
     bytesArray2[8] = 9;
-    LAR_BYTES_EQUAL(bytesArray1, bytesArray2, 12);
+    LUKIP_BYTES_EQUAL(bytesArray1, bytesArray2, 12);
 }
 
-void string_array_test() {
+void string_test() {
     char str1[10] = "string!9", str2[10] = "string!";
-    LAR_STRING_EQUAL(str1, str2);
+    LUKIP_STRING_EQUAL(str1, str2);
 }
 
 int main() {
-    LAR_INIT();
-    MAKE_SET_UP(setUp2);
-    MAKE_TEAR_DOWN(tearDown2);
+    LUKIP_INIT();
+    MAKE_SET_UP(set_up2);
+    MAKE_TEAR_DOWN(tear_down2);
 
-    TEST(string_array_test2);
+    TEST(string_test2);
     TEST(failed_test);
     TEST(successful_test);
     TEST(empty_test);
     TEST(bytes_array_test);
-    TEST(string_array_test);
-    TEST(string_array_test2);
+    TEST(string_test);
+    TEST(string_test2);
 
-    LAR_END();
+    LUKIP_END();
     return 0;
 }

@@ -2,14 +2,14 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "lar_asserts.h"
-#include "output.h"
+#include "lukip_asserts.h"
+#include "lukip_output.h"
 
 #define GROW_CAPACITY(capacity) ((capacity) < 16 ? 16 : (capacity) * 2)
 #define BUFFER_LENGTH 256
 
 static char buffer[BUFFER_LENGTH];
-static LarUnit larUnit;
+static LukipUnit lukip;
 
 static void *reallocate(void *pointer, const int newSize, const size_t elementSize) {
     void *result = realloc(pointer, newSize * elementSize);
@@ -43,14 +43,14 @@ static char *fstr_alloc(const char *format, ...) {
     return message;
 }
 
-void init_lar_unit() {
-    larUnit.testsCapacity = 0;
-    larUnit.testsLength = 0;
-    larUnit.tests = NULL;
+void init_lukip() {
+    lukip.testsCapacity = 0;
+    lukip.testsLength = 0;
+    lukip.tests = NULL;
 
-    larUnit.setUp = NULL;
-    larUnit.tearDown = NULL;
-    larUnit.successful = false;
+    lukip.setUp = NULL;
+    lukip.tearDown = NULL;
+    lukip.successful = false;
 }
 
 static void init_test_info(TestInfo *info) {
@@ -80,29 +80,29 @@ static void free_failure_messages(TestFunc *failedFunc) {
     }
 }
 
-void end_lar_unit() {
-    show_results(larUnit);
-    for (int i = 0; i < larUnit.testsLength; i++) {
-        if (larUnit.tests[i].info.status == FAILURE) {
-            free_failure_messages(&larUnit.tests[i]);
-            free(larUnit.tests[i].failures);
+void end_lukip() {
+    show_results(lukip);
+    for (int i = 0; i < lukip.testsLength; i++) {
+        if (lukip.tests[i].info.status == FAILURE) {
+            free_failure_messages(&lukip.tests[i]);
+            free(lukip.tests[i].failures);
         }
     }
-    free(larUnit.tests);
+    free(lukip.tests);
 }
 
 static void append_test(const TestFunc newTest) {
-    if (larUnit.testsCapacity < larUnit.testsLength + 1) {
-        larUnit.testsCapacity = GROW_CAPACITY(larUnit.testsCapacity);
-        larUnit.tests = reallocate(
-            larUnit.tests, larUnit.testsCapacity, sizeof(TestFunc)
+    if (lukip.testsCapacity < lukip.testsLength + 1) {
+        lukip.testsCapacity = GROW_CAPACITY(lukip.testsCapacity);
+        lukip.tests = reallocate(
+            lukip.tests, lukip.testsCapacity, sizeof(TestFunc)
         );
     }
-    larUnit.tests[larUnit.testsLength++] = newTest;
+    lukip.tests[lukip.testsLength++] = newTest;
 }
 
 static void append_failure(const Failure failure) {
-    TestFunc *testFunc = &larUnit.tests[larUnit.testsLength - 1];
+    TestFunc *testFunc = &lukip.tests[lukip.testsLength - 1];
 
     if (testFunc->failsCapacity < testFunc->failsLength + 1) {
         testFunc->failsCapacity = GROW_CAPACITY(testFunc->failsCapacity);
@@ -114,8 +114,8 @@ static void append_failure(const Failure failure) {
 }
 
 void test_func(const EmptyFunc funcToTest, LineInfo caller) {
-    if (larUnit.setUp != NULL) {
-        larUnit.setUp();
+    if (lukip.setUp != NULL) {
+        lukip.setUp();
     }
     TestFunc testFunc;
     init_test(&testFunc);
@@ -123,13 +123,13 @@ void test_func(const EmptyFunc funcToTest, LineInfo caller) {
 
     append_test(testFunc);
     funcToTest();
-    if (larUnit.tearDown != NULL) {
-        larUnit.tearDown();
+    if (lukip.tearDown != NULL) {
+        lukip.tearDown();
     }
 }
 
 static void assert_success(const TestInfo newInfo) {
-    TestInfo *info = &larUnit.tests[larUnit.testsLength - 1].info;
+    TestInfo *info = &lukip.tests[lukip.testsLength - 1].info;
     if (info->status == UNKNOWN) {
         info->fileName = newInfo.fileName;
         info->funcName = newInfo.funcName;
@@ -138,23 +138,23 @@ static void assert_success(const TestInfo newInfo) {
 }
 
 static void assert_failure(const TestInfo newInfo, const int line, char *message) {
-    TestInfo *info = &larUnit.tests[larUnit.testsLength - 1].info;
+    TestInfo *info = &lukip.tests[lukip.testsLength - 1].info;
     if (info->status == UNKNOWN) {
         info->fileName = newInfo.fileName;
         info->funcName = newInfo.funcName;
     }
-    larUnit.successful = false;
+    lukip.successful = false;
     info->status = FAILURE;
     Failure failure = {.line=line, .message=message};
     append_failure(failure);
 }
 
 void make_set_up(const EmptyFunc newSetUp) {
-    larUnit.setUp = newSetUp;
+    lukip.setUp = newSetUp;
 }
 
 void make_tear_down(const EmptyFunc newTearDown) {
-    larUnit.tearDown = newTearDown;
+    lukip.tearDown = newTearDown;
 }
 
 void assert_bytes_equal(
