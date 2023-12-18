@@ -12,15 +12,10 @@
 #define MAKE_SET_UP(setUpFunc) make_set_up(setUpFunc)
 #define MAKE_TEAR_DOWN(tearDownFunc) make_tear_down(tearDownFunc)
 
-#define TEST(FuncToTest) \
-    test_func( \
-        FuncToTest, \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,} \
-    )
-
 #define LINE_INFO (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}
-    
-// add other tests for things like: Hexadecimals, comparisons (<=, < >= >)
+
+#define TEST(FuncToTest) test_func(FuncToTest, LINE_INFO)
+
 #define LUKIP_INT_EQUAL(val1, val2) \
     verify_condition( \
         (val1) == (val2), LINE_INFO, \
