@@ -2,12 +2,13 @@ CC=gcc
 
 CFLAGS=-Wall -Wextra -Wpedantic -g -Werror
 
-SRC_DIR=src
+SRCDIR=src
+TESTDIR=tests
 BIN=bin
 
 EXE=lar
 
-SRCS=$(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c $(SRC_DIR)/*/*/*.c)
+SRCS=$(wildcard $(SRCDIR)/*.c $(SRCDIR)/*/*.c $(SRCDIR)/*/*/*.c $(TESTDIR)/*.c $(TESTDIR)/*/*.c)
 OBJS=$(SRCS:.c=.o)
 
 .PHONY: all clean
