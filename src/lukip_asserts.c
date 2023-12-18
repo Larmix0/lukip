@@ -27,18 +27,18 @@ static void *allocate(const int newSize, const size_t elementSize) {
     return result;
 }
 
-static char *vfstr_alloc(const char *format, va_list args) {
+static char *vstrf_alloc(const char *format, va_list args) {
     vsnprintf(buffer, BUFFER_LENGTH, format, args);
-    const int len = strlen(buffer) + 1; // account for NUL.
-    char *message = allocate(len, sizeof(char));
-    strncpy(message, buffer, len);
+    const size_t length = strlen(buffer) + 1; // account for NUL.
+    char *message = allocate((int)length, sizeof(char));
+    strncpy(message, buffer, length);
     return message;
 }
 
-static char *fstr_alloc(const char *format, ...) {
+char *strf_alloc(const char *format, ...) {
     va_list args;
     va_start(args, format);
-    char *message = vfstr_alloc(format, args);
+    char *message = vstrf_alloc(format, args);
     va_end(args);
     return message;
 }
@@ -51,7 +51,7 @@ void init_lukip() {
     lukip.setUp = NULL;
     lukip.tearDown = NULL;
     lukip.startTime = clock();
-    lukip.successful = false;
+    lukip.successful = true;
 }
 
 static void init_test_info(TestInfo *info) {
@@ -171,7 +171,7 @@ void assert_bytes_equal(
         if (arr1Byte == arr2Byte) {
             continue;
         }
-        char *message = fstr_alloc(
+        char *message = strf_alloc(
             "Failed at index %i: %u != %u. (Expected equal).", i, arr1Byte, arr2Byte
         );
         assert_failure(info, line, message);
@@ -188,15 +188,15 @@ void assert_strings_equal(
     size_t length1 = strlen(string1);
     size_t length2 = strlen(string2);
     if (length1 != length2) {
-        char *message = fstr_alloc(
-            "Different lengths: %zu != %zu. (Expected same strings)", length1, length2
+        char *message = strf_alloc(
+            "Different lengths: %zu != %zu. (Expected same strings).", length1, length2
         );
         assert_failure(info, line, message);
         return;
     }
     if (strncmp(string1, string2, strlen(string1)) != 0) {
-        char *message = fstr_alloc(
-            "%s != %s. (Expected same strings)", string1, string2
+        char *message = strf_alloc(
+            "%s != %s. (Expected same strings).", string1, string2
         );
         assert_failure(info, line, message);
         return;
@@ -215,7 +215,7 @@ void verify_condition(
     }
     va_list args;
     va_start(args, format);
-    char *message = vfstr_alloc(format, args);
+    char *message = vstrf_alloc(format, args);
     assert_failure(info, line, message);
     va_end(args);
 }

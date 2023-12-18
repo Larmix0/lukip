@@ -59,6 +59,8 @@ typedef struct {
 void init_lukip();
 void end_lukip();
 
+char *strf_alloc(const char *format, ...);
+
 void make_set_up(const EmptyFunc newSetUp);
 void make_tear_down(const EmptyFunc newTearDown);
 
