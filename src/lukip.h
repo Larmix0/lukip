@@ -17,83 +17,70 @@
         FuncToTest, \
         (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,} \
     )
+
+#define LINE_INFO (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}
     
 // add other tests for things like: Hexadecimals, comparisons (<=, < >= >)
 #define LUKIP_INT_EQUAL(val1, val2) \
     verify_condition( \
-        (val1) == (val2), \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}, \
+        (val1) == (val2), LINE_INFO, \
         "%d != %d. (Expected equal).", (val1), (val2) \
     )
 
 #define LUKIP_UINT_EQUAL(val1, val2) \
     verify_condition( \
-        (val1) == (val2), \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}, \
+        (val1) == (val2), LINE_INFO, \
         "%u != %u. (Expected equal).", (val1), (val2) \
     )
 
 #define LUKIP_LONG_EQUAL(val1, val2) \
     verify_condition( \
-        (val1) == (val2), \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}, \
+        (val1) == (val2), LINE_INFO, \
         "%li != %li. (Expected equal).", (val1), (val2) \
     )
 
 #define LUKIP_ULONG_EQUAL(val1, val2) \
     verify_condition( \
-        (val1) == (val2), \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}, \
+        (val1) == (val2), LINE_INFO, \
         "%lu != %lu. (Expected equal).", (val1), (val2) \
     )
 
 #define LUKIP_CHAR_EQUAL(val1, val2) \
     verify_condition( \
-        (val1) == (val2), \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}, \
+        (val1) == (val2), LINE_INFO, \
         "%c != %c. (Expected equal).", (val1), (val2) \
     )
 
 #define LUKIP_SIZE_T_EQUAL(val1, val2) \
     verify_condition( \
-        (val1) == (val2), \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}, \
+        (val1) == (val2), LINE_INFO, \
         "%zu != %zu. (Expected equal).", (val1), (val2) \
     )
 
 #define LUKIP_FLOAT_EQUAL(val1, val2) \
     verify_condition( \
-        (val1) == (val2), \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}, \
+        (val1) == (val2), LINE_INFO, \
         "%f != %f. (Expected equal).", (val1), (val2) \
     )
 
 #define LUKIP_DOUBLE_EQUAL(val1, val2) \
     verify_condition( \
-        (val1) == (val2), \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}, \
+        (val1) == (val2), LINE_INFO, \
         "%lf != %lf. (Expected equal).", (val1), (val2) \
     )
 
 #define LUKIP_BOOL_EQUAL(val1, val2) \
     verify_condition( \
-        (val1) == (val2), \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}, \
+        (val1) == (val2), LINE_INFO, \
         "%s != %s. (Expected equal).", \
         (val1) == true ? "true" : "false", \
         (val2) == true ? "true" : "false" \
     )
 
 #define LUKIP_BYTES_EQUAL(val1, val2, length) \
-    assert_bytes_equal( \
-        val1, val2, length, \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,} \
-    )
+    assert_bytes_equal(val1, val2, length, LINE_INFO)
 
 #define LUKIP_STRING_EQUAL(val1, val2) \
-    assert_strings_equal( \
-        val1, val2, \
-        (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,} \
-    )
+    assert_strings_equal(val1, val2, LINE_INFO)
 
 #endif
