@@ -66,17 +66,9 @@ void make_tear_down(const EmptyFunc newTearDown);
 
 void test_func(const EmptyFunc funcToTest, LineInfo caller);
 
-void assert_bytes_equal(
-    void *array1, void *array2, const int length,
-    char *fileName, char *funcName, const int line
-);
-void assert_strings_equal(
-    char *string1, char *string2,
-    char *fileName, char *funcName, const int line
-);
-void verify_condition(
-    bool condition, char *fileName, char *funcName, const int line,
-    const char *format, ...
-);
+void assert_bytes_equal(void *array1, void *array2, const int length, LineInfo lineInfo);
+void assert_strings_equal(char *string1, char *string2, LineInfo lineInfo);
+
+void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...);
 
 #endif

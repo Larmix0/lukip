@@ -159,10 +159,11 @@ void make_tear_down(const EmptyFunc newTearDown) {
 }
 
 void assert_bytes_equal(
-    void *array1, void *array2, const int length,
-    char *fileName, char *funcName, const int line
+    void *array1, void *array2, const int length, LineInfo lineInfo
 ) {
-    TestInfo info = {.fileName=fileName, .funcName=funcName, .status=UNKNOWN};
+    TestInfo testInfo = {
+        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
+    };
     uint8_t arr1Byte, arr2Byte;
 
     for (int i = 0; i < length; i++) {
@@ -174,48 +175,46 @@ void assert_bytes_equal(
         char *message = strf_alloc(
             "Failed at index %i: %u != %u. (Expected equal).", i, arr1Byte, arr2Byte
         );
-        assert_failure(info, line, message);
+        assert_failure(testInfo, lineInfo.line, message);
         return;
     }
-    assert_success(info);
+    assert_success(testInfo);
 }
 
-void assert_strings_equal(
-    char *string1, char *string2,
-    char *fileName, char *funcName, const int line
-) {
-    TestInfo info = {.fileName=fileName, .funcName=funcName, .status=UNKNOWN};
+void assert_strings_equal(char *string1, char *string2, LineInfo lineInfo) {
+    TestInfo testInfo = {
+        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
+    };
     size_t length1 = strlen(string1);
     size_t length2 = strlen(string2);
     if (length1 != length2) {
         char *message = strf_alloc(
             "Different lengths: %zu != %zu. (Expected same strings).", length1, length2
         );
-        assert_failure(info, line, message);
+        assert_failure(testInfo, lineInfo.line, message);
         return;
     }
     if (strncmp(string1, string2, strlen(string1)) != 0) {
         char *message = strf_alloc(
             "%s != %s. (Expected same strings).", string1, string2
         );
-        assert_failure(info, line, message);
+        assert_failure(testInfo, lineInfo.line, message);
         return;
     }
-    assert_success(info);
+    assert_success(testInfo);
 }
 
-void verify_condition(
-    bool condition, char *fileName, char *funcName, const int line,
-    const char *format, ...
-) {
-    TestInfo info = {.fileName=fileName, .funcName=funcName, .status=UNKNOWN};
+void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...) {
+    TestInfo testInfo = {
+        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
+    };
     if (condition) {
-        assert_success(info);
+        assert_success(testInfo);
         return;
     }
     va_list args;
     va_start(args, format);
     char *message = vstrf_alloc(format, args);
-    assert_failure(info, line, message);
+    assert_failure(testInfo, lineInfo.line, message);
     va_end(args);
 }
