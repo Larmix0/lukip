@@ -65,6 +65,7 @@ int main() {
     TEST(empty_test);
     TEST(bytes_array_test);
     TEST(string_test);
+    TEST(empty_test);
     TEST(string_test2);
 
     LUKIP_END();
