@@ -1,30 +1,30 @@
 CC = gcc
-
 CFLAGS = -Wall -Wextra -Wpedantic -g -Werror
 
-OS = $(shell uname)
-
-SRCDIR = src
-TESTDIR = tests
+SRC_DIR = src
+TEST_DIR = tests
 BIN = bin
 
-ifeq ($(OS), Darwin)
+SRCS := $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c $(SRC_DIR)/*/*/*.c)
+TESTS := $(wildcard $(TEST_DIR)/*.c $(TEST_DIR)/*/*.c $(TEST_DIR)/*/*/*.c)
+
+ifeq ($(OS), Windows_NT)
 	EXE = lukip.exe
+	SRCS :=  $(subst /,\,$(SRCS))
+	TESTS := $(subst /,\,$(TESTS))
 else
 	EXE = lukip
 endif
 
-SRCS=$(wildcard $(SRCDIR)/*.c $(SRCDIR)/*/*.c $(SRCDIR)/*/*/*.c)
-TESTS=$(wildcard $(TESTDIR)/*.c $(TESTDIR)/*/*.c $(TESTDIR)/*/*/*.c)
-OBJS=$(SRCS:.c=.o)
-TESTOBJS=$(TESTS:.c=.o)
+OBJS = $(SRCS:.c=.o)
+TEST_OBJS = $(TESTS:.c=.o)
 
 .PHONY: all clean
 
 all: $(EXE)
 
-$(EXE): $(BIN) $(OBJS) $(TESTOBJS)
-	$(CC) -o $</$@ $(OBJS) $(TESTOBJS)
+$(EXE): $(BIN) $(OBJS) $(TEST_OBJS)
+	$(CC) -o $</$@ $(OBJS) $(TEST_OBJS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $^ -o $@
@@ -33,4 +33,9 @@ $(BIN):
 	mkdir $(BIN)
 
 clean:
-	rm -rf $(OBJS) $(TESTOBJS) $(BIN)
+ifeq ($(OS), Windows_NT)
+	$(foreach obj, $(OBJS) $(TEST_OBJS), if exist $(obj) del /s /q $(obj) > NUL &)
+	if exist $(BIN) rmdir /s /q $(BIN)
+else
+	rm -rf $(OBJS) $(TEST_OBJS) $(BIN)
+endif
