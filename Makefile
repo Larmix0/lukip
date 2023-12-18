@@ -21,7 +21,12 @@ TEST_OBJS = $(TESTS:.c=.o)
 
 .PHONY: all clean
 
-all: $(EXE)
+all: lib
+
+lib: $(OBJS)
+	ar rcs liblukip.a $<
+
+tests: $(EXE)
 
 $(EXE): $(BIN) $(OBJS) $(TEST_OBJS)
 	$(CC) -o $</$@ $(OBJS) $(TEST_OBJS)
