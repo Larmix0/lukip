@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "lukip_asserts.h"
+#include "../src/lukip_asserts.h"
 
 #define LUKIP_INIT() init_lukip()
 #define LUKIP_END() end_lukip()

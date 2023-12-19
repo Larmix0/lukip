@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -g -Werror -Iinclude -Isrc
+CFLAGS = -Wall -Wextra -Wpedantic -g -Werror -Iinclude
 
 SRC_DIR = src
 TEST_DIR = tests
@@ -24,7 +24,7 @@ TEST_OBJS = $(TESTS:.c=.o)
 all: lib
 
 lib: $(OBJS)
-	ar rcs liblukip.a $<
+	ar rcs liblukip.a $^
 
 tests: $(EXE)
 
