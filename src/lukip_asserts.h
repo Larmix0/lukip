@@ -61,6 +61,7 @@ void end_lukip();
 
 char *strf_alloc(const char *format, ...);
 
+void make_test_suite(const EmptyFunc newSetUp, const EmptyFunc newTearDown);
 void make_set_up(const EmptyFunc newSetUp);
 void make_tear_down(const EmptyFunc newTearDown);
 

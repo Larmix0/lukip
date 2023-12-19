@@ -150,6 +150,11 @@ static void assert_failure(const TestInfo newInfo, const int line, char *message
     append_failure(failure);
 }
 
+void make_test_suite(const EmptyFunc newSetUp, const EmptyFunc newTearDown) {
+    lukip.setUp = newSetUp;
+    lukip.tearDown = newTearDown;
+}
+
 void make_set_up(const EmptyFunc newSetUp) {
     lukip.setUp = newSetUp;
 }

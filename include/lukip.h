@@ -9,10 +9,12 @@
 #define LUKIP_INIT() init_lukip()
 #define LUKIP_END() end_lukip()
 
+#define MAKE_TEST_SUITE(setUpFunc, tearDownFunc) make_test_suite(setUpFunc, tearDownFunc)
 #define MAKE_SET_UP(setUpFunc) make_set_up(setUpFunc)
 #define MAKE_TEAR_DOWN(tearDownFunc) make_tear_down(tearDownFunc)
 
-#define LINE_INFO (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}
+#define LINE_INFO (LineInfo) \
+    {.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}
 
 #define TEST(FuncToTest) test_func(FuncToTest, LINE_INFO)
 
