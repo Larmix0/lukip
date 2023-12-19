@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -g -Werror
+CFLAGS = -Wall -Wextra -Wpedantic -g -Werror -Iinclude -Isrc
 
 SRC_DIR = src
 TEST_DIR = tests
@@ -19,7 +19,7 @@ endif
 OBJS = $(SRCS:.c=.o)
 TEST_OBJS = $(TESTS:.c=.o)
 
-.PHONY: all clean
+.PHONY: all clean lib tests
 
 all: lib
 
@@ -41,6 +41,7 @@ clean:
 ifeq ($(OS), Windows_NT)
 	$(foreach obj, $(OBJS) $(TEST_OBJS), if exist $(obj) del /s /q $(obj) > NUL &)
 	if exist $(BIN) rmdir /s /q $(BIN)
+	if exist liblukip.a del /s /q liblukip.a
 else
-	rm -rf $(OBJS) $(TEST_OBJS) $(BIN)
+	rm -rf $(OBJS) $(TEST_OBJS) $(BIN) liblukip.a
 endif

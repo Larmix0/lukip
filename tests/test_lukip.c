@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "../src/lukip.h"
+#include "lukip.h"
 #include "included_tests.h"
 
 void temp_set_up() {

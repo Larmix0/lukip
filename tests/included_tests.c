@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "../src/lukip.h"
+#include "lukip.h"
 
 int globalNum = 0;
 
