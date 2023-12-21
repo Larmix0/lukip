@@ -20,13 +20,19 @@ void empty_test() {
 void failed_test() {
     LUKIP_BOOL_EQUAL(true, false);
     int8_t five = 5;
-    LUKIP_INT_EQUAL(five, 5);
+    LUKIP_INT_EQUAL(five, 7);
+    int bin1 = 180;
+    int bin2 = 5;
+    LUKIP_BINARY_EQUAL(bin1, bin2);
+    LUKIP_HEX_EQUAL(0xA0, 0x9);
     LUKIP_INT_EQUAL(5, 6);
 }
 
 void successful_test() {
     LUKIP_BOOL_EQUAL(true, true);
-    LUKIP_INT_EQUAL(5, 5);
+    int8_t five = 5;
+    LUKIP_INT_EQUAL(five, 5);
+    LUKIP_HEX_EQUAL(0x9, 0x009);
     LUKIP_INT_EQUAL(2, 2);
 }
 
@@ -63,6 +69,7 @@ int main() {
         i++;
         i--;
     }
+    
     TEST(empty_test);
     TEST(bytes_array_test);
     TEST(string_test);

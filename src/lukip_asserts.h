@@ -70,6 +70,7 @@ void test_func(const EmptyFunc funcToTest, LineInfo caller);
 void assert_bytes_equal(void *array1, void *array2, const int length, LineInfo lineInfo);
 void assert_strings_equal(char *string1, char *string2, LineInfo lineInfo);
 
+void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...);
 void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...);
 
 #endif

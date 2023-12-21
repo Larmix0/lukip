@@ -92,6 +92,7 @@ For fun as well as having a small, easy-to-use unit-testing framework in C, inst
 It was also a nice learning experience.
 
 ## Known issues
+* Binary assert functions take ints as arguments, perhaps change to int_64.
 * Missing documentation. I will add it later.
 * Needs more assertions (will be added very soon).
 * Better and more tests.

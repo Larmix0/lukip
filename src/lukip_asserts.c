@@ -8,40 +8,14 @@
 #define GROW_CAPACITY(capacity) ((capacity) < 16 ? 16 : (capacity) * 2)
 #define BUFFER_LENGTH 256
 
+typedef struct {
+    int capacity;
+    int length;
+    char *buffer;
+} MessageBuffer;
+
 static char buffer[BUFFER_LENGTH];
 static LukipUnit lukip;
-
-static void *reallocate(void *pointer, const int newSize, const size_t elementSize) {
-    void *result = realloc(pointer, newSize * elementSize);
-    if (result == NULL) {
-        exit(1);
-    }
-    return result;
-}
-
-static void *allocate(const int newSize, const size_t elementSize) {
-    void *result = malloc(newSize * elementSize);
-    if (result == NULL) {
-        exit(1);
-    }
-    return result;
-}
-
-static char *vstrf_alloc(const char *format, va_list args) {
-    vsnprintf(buffer, BUFFER_LENGTH, format, args);
-    const size_t length = strlen(buffer) + 1; // account for NUL.
-    char *message = allocate((int)length, sizeof(char));
-    strncpy(message, buffer, length);
-    return message;
-}
-
-char *strf_alloc(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    char *message = vstrf_alloc(format, args);
-    va_end(args);
-    return message;
-}
 
 void init_lukip() {
     lukip.testsCapacity = 0;
@@ -73,6 +47,102 @@ static void init_test(TestFunc *test) {
     test->testFunc = NULL;
     init_test_info(&test->info);
     init_line_info(&test->caller);
+}
+
+static void init_message_buffer(MessageBuffer *message) {
+    message->length = 0;
+    message->capacity = 0;
+    message->buffer = NULL;
+}
+
+static void *allocate(const int size, const size_t elementSize) {
+    void *result = malloc(size * elementSize);
+    if (result == NULL) {
+        exit(1);
+    }
+    return result;
+}
+
+static void *reallocate(void *pointer, const int newSize, const size_t elementSize) {
+    void *result = realloc(pointer, newSize * elementSize);
+    if (result == NULL) {
+        exit(1);
+    }
+    return result;
+}
+
+static char *vstrf_alloc(const char *format, va_list args) {
+    vsnprintf(buffer, BUFFER_LENGTH, format, args);
+    const size_t length = strlen(buffer) + 1; // account for NUL.
+    char *message = allocate((int)length, sizeof(char));
+    strncpy(message, buffer, length);
+    return message;
+}
+
+char *strf_alloc(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    char *message = vstrf_alloc(format, args);
+    va_end(args);
+    return message;
+}
+
+static void concatenate_buffers(MessageBuffer *dest, char *src) {
+    int srcLength = strlen(src);
+
+    if (dest->length + srcLength + 1 >= dest->capacity) {
+        dest->capacity += srcLength * 2;
+        dest->buffer = reallocate(dest->buffer, dest->capacity, sizeof(char));
+    }
+    dest->buffer[dest->length] = '\0';
+    strncat(dest->buffer, src, srcLength);
+    dest->length += srcLength;
+}
+
+void reverse_string(char *string) {
+    const int length = strlen(string);
+    char tmp;
+    for (int i = 0; i < length / 2; i++) {
+        tmp = string[i];
+        string[i] = string[length - i - 1];
+        string[length - i - 1] = tmp;
+    }
+}
+
+static char *binary_str_alloc(int value) {
+    const int BYTE_SIZE = 8;
+    int bitsCopied = 0;
+    MessageBuffer binAsStr;
+    init_message_buffer(&binAsStr);
+
+    while (value != 0) {
+        // increase size every byte, also add space unless it's the start of the string.
+        if (bitsCopied % BYTE_SIZE == 0) {
+            binAsStr.capacity += BYTE_SIZE + 1;
+            binAsStr.buffer = reallocate(
+                binAsStr.buffer, binAsStr.capacity, sizeof(char)
+            );
+            if (bitsCopied != 0) {
+                binAsStr.buffer[binAsStr.length++] = ' ';
+            }
+        }
+        // add bit at the very right
+        if (value & 1) {
+            binAsStr.buffer[binAsStr.length++] = '1';
+        } else {
+            binAsStr.buffer[binAsStr.length++] = '0';
+        }
+        bitsCopied++;
+        value >>= 1; // read next bit
+    }
+    // pad remaining bits
+    while (bitsCopied % BYTE_SIZE != 0) {
+        binAsStr.buffer[binAsStr.length++] = '0';
+        bitsCopied++;
+    }
+    binAsStr.buffer[binAsStr.length] = '\0';
+    reverse_string(binAsStr.buffer);
+    return binAsStr.buffer;
 }
 
 static void free_failure_messages(TestFunc *failedFunc) {
@@ -161,6 +231,58 @@ void make_set_up(const EmptyFunc newSetUp) {
 
 void make_tear_down(const EmptyFunc newTearDown) {
     lukip.tearDown = newTearDown;
+}
+
+static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list args) {
+    int idx = 0;
+    char *tempBuffer;
+    while (format[idx] != '\0') {
+        if (format[idx] != '%') {
+            // + 2 to always have space for NUL.
+            if (message->length + 2 >= message->capacity) {
+                message->capacity = GROW_CAPACITY(message->capacity);
+                message->buffer = reallocate(
+                    message->buffer, message->capacity, sizeof(char)
+                );
+            }
+            message->buffer[message->length++] = format[idx++];
+            continue;
+        }
+        idx++;
+        switch (format[idx]) {
+        case 'd':
+            idx++;
+            tempBuffer = strf_alloc("%d", va_arg(args, int));
+            concatenate_buffers(message, tempBuffer);
+            free(tempBuffer);
+            break;
+        case 's':
+            idx++;
+            tempBuffer = binary_str_alloc(va_arg(args, int));
+            concatenate_buffers(message, tempBuffer);
+            free(tempBuffer);
+            break;
+        }
+    }
+    message->buffer[message->length] = '\0';
+}
+
+void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...) {
+    TestInfo testInfo = {
+        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
+    };
+    if (condition) {
+        assert_success(testInfo);
+        return;
+    }
+    va_list args;
+    va_start(args, format);
+    MessageBuffer message;
+    init_message_buffer(&message);
+
+    vbin_str_sprintf(&message, format, args);
+    assert_failure(testInfo, lineInfo.line, message.buffer);
+    va_end(args);
 }
 
 void assert_bytes_equal(
