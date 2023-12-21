@@ -87,7 +87,7 @@ char *strf_alloc(const char *format, ...) {
     return message;
 }
 
-static void concatenate_buffers(MessageBuffer *dest, char *src) {
+static void concatenate_buffer(MessageBuffer *dest, char *src) {
     int srcLength = strlen(src);
 
     if (dest->length + srcLength + 1 >= dest->capacity) {
@@ -109,40 +109,29 @@ void reverse_string(char *string) {
     }
 }
 
-static char *binary_str_alloc(int value) {
+static void sprint_int_as_bin(char *string, LukipInt value) {
     const int BYTE_SIZE = 8;
-    int bitsCopied = 0;
-    MessageBuffer binAsStr;
-    init_message_buffer(&binAsStr);
+    int bitsCopied = 0, length = 0;
 
     while (value != 0) {
-        // increase size every byte, also add space unless it's the start of the string.
-        if (bitsCopied % BYTE_SIZE == 0) {
-            binAsStr.capacity += BYTE_SIZE + 1;
-            binAsStr.buffer = reallocate(
-                binAsStr.buffer, binAsStr.capacity, sizeof(char)
-            );
-            if (bitsCopied != 0) {
-                binAsStr.buffer[binAsStr.length++] = ' ';
-            }
+        // add white space every byte
+        if (bitsCopied % BYTE_SIZE == 0 && bitsCopied != 0) {
+            string[length++] = ' ';
         }
-        // add bit at the very right
-        if (value & 1) {
-            binAsStr.buffer[binAsStr.length++] = '1';
-        } else {
-            binAsStr.buffer[binAsStr.length++] = '0';
-        }
+        // add bit from the very right
+        string[length++] = value & 1 ? '1' : '0';
         bitsCopied++;
         value >>= 1; // read next bit
     }
     // pad remaining bits
     while (bitsCopied % BYTE_SIZE != 0) {
-        binAsStr.buffer[binAsStr.length++] = '0';
+        string[length++] = '0';
         bitsCopied++;
     }
-    binAsStr.buffer[binAsStr.length] = '\0';
-    reverse_string(binAsStr.buffer);
-    return binAsStr.buffer;
+    // we were copying bits from right, but strings go from left to right
+    // so we have to reverse the result in order to have bytes in the correct order.
+    string[length] = '\0';
+    reverse_string(string);
 }
 
 static void free_failure_messages(TestFunc *failedFunc) {
@@ -235,7 +224,6 @@ void make_tear_down(const EmptyFunc newTearDown) {
 
 static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list args) {
     int idx = 0;
-    char *tempBuffer;
     while (format[idx] != '\0') {
         if (format[idx] != '%') {
             // + 2 to always have space for NUL.
@@ -250,17 +238,32 @@ static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list
         }
         idx++;
         switch (format[idx]) {
+        case 'l':
+            if (format[idx + 1] == 'd' || format[idx + 1] == 'i') {
+                idx += 2;
+                snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_STR, va_arg(args, LukipInt));
+                concatenate_buffer(message, buffer);
+            }
+            else if (format[idx + 1] == 'u') {
+                idx += 2;
+                snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_STR, va_arg(args, LukipUnsigned));
+                concatenate_buffer(message, buffer);
+            }
+            break;
         case 'd':
             idx++;
-            tempBuffer = strf_alloc("%d", va_arg(args, int));
-            concatenate_buffers(message, tempBuffer);
-            free(tempBuffer);
+            snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_STR, va_arg(args, LukipInt));
+            concatenate_buffer(message, buffer);
+            break;
+        case 'u':
+            idx++;
+            snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_STR, va_arg(args, LukipUnsigned));
+            concatenate_buffer(message, buffer);
             break;
         case 's':
             idx++;
-            tempBuffer = binary_str_alloc(va_arg(args, int));
-            concatenate_buffers(message, tempBuffer);
-            free(tempBuffer);
+            sprint_int_as_bin(buffer, va_arg(args, LukipInt));
+            concatenate_buffer(message, buffer);
             break;
         }
     }

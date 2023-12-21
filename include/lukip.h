@@ -84,22 +84,36 @@
 #define LUKIP_HEX_EQUAL(val1, val2) \
     verify_condition( \
         (val1) == (val2), LINE_INFO, \
-        "0x%X != 0x%X. (%d != %d, expected same hexes).", \
+        "0x%X != 0x%X. (" LUKIP_INT_STR " != " LUKIP_INT_STR ", expected same hexes).", \
+        (val1), (val2), (val1), (val2) \
+    )
+
+#define LUKIP_UHEX_EQUAL(val1, val2) \
+    verify_condition( \
+        (val1) == (val2), LINE_INFO, \
+        "0x%X != 0x%X. (" LUKIP_UINT_STR " != " LUKIP_UINT_STR ", expected same hexes).", \
         (val1), (val2), (val1), (val2) \
     )
 
 #define LUKIP_BINARY_EQUAL(val1, val2) \
     verify_binary( \
         (val1) == (val2), LINE_INFO, \
-        "%s != %s. (%d != %d, Expected same binary).", \
+        "%s != %s. (" LUKIP_INT_STR " != " LUKIP_INT_STR ", Expected same binary).", \
          (val1), (val2), (val1), (val2) \
     )
 
-// TODO: Implement a verify_bytes or an assert_bytes_not_equal function.
+#define LUKIP_UBINARY_EQUAL(val1, val2) \
+    verify_binary( \
+        (val1) == (val2), LINE_INFO, \
+        "%s != %s. (" LUKIP_UINT_STR " != " LUKIP_UINT_STR ", Expected same binary).", \
+         (val1), (val2), (val1), (val2) \
+    )
+
+// TODO: make it a "verify_bytes" function or create an assert_bytes_not_equal function.
 #define LUKIP_BYTES_EQUAL(val1, val2, length) \
     assert_bytes_equal(val1, val2, length, LINE_INFO)
 
-// TODO: Implement a verify_string or an assert_strings_not_equal function.
+// TODO: make it a "verify_string" function or create an assert_strings_not_equal function.
 #define LUKIP_STRING_EQUAL(val1, val2) \
     assert_strings_equal(val1, val2, LINE_INFO)
 

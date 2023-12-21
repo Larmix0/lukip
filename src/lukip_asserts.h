@@ -5,11 +5,17 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <time.h>
 
 #include "lukip.h"
 
+#define LUKIP_INT_STR "%ld"
+#define LUKIP_UINT_STR "%lu"
+
+typedef int64_t LukipInt;
+typedef uint64_t LukipUnsigned;
 typedef void (*EmptyFunc)();
 
 typedef enum {
