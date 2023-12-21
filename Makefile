@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -g -Werror -Iinclude
+CFLAGS = -Wall -Wextra -Wpedantic -g3 -Werror -Iinclude
 
 SRC_DIR = src
 TEST_DIR = tests

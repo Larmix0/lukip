@@ -23,8 +23,8 @@ void failed_test() {
     LUKIP_INT_EQUAL(five, 7);
 
     uint8_t bin1 = 112;
-    unsigned long bin2 = 1546744073709551615;
-    LUKIP_BINARY_EQUAL(bin1, bin2);
+    unsigned long long bin2 = 1546744073709551615;
+    LUKIP_UBINARY_EQUAL(bin1, bin2);
 
     LUKIP_HEX_EQUAL(0xA0, 0x9);
     LUKIP_INT_EQUAL(5, 6);

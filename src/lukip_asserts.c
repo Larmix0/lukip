@@ -71,8 +71,8 @@ static void *reallocate(void *pointer, const int newSize, const size_t elementSi
     return result;
 }
 
-static char *vstrf_alloc(const char *format, va_list args) {
-    vsnprintf(buffer, BUFFER_LENGTH, format, args);
+static char *vstrf_alloc(const char *format, va_list *args) {
+    vsnprintf(buffer, BUFFER_LENGTH, format, *args);
     const size_t length = strlen(buffer) + 1; // account for NUL.
     char *message = allocate((int)length, sizeof(char));
     strncpy(message, buffer, length);
@@ -82,7 +82,7 @@ static char *vstrf_alloc(const char *format, va_list args) {
 char *strf_alloc(const char *format, ...) {
     va_list args;
     va_start(args, format);
-    char *message = vstrf_alloc(format, args);
+    char *message = vstrf_alloc(format, &args);
     va_end(args);
     return message;
 }
@@ -222,7 +222,7 @@ void make_tear_down(const EmptyFunc newTearDown) {
     lukip.tearDown = newTearDown;
 }
 
-static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list args) {
+static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list *args) {
     int idx = 0;
     while (format[idx] != '\0') {
         if (format[idx] != '%') {
@@ -239,33 +239,38 @@ static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list
         idx++;
         switch (format[idx]) {
         case 'l':
+            if (format[idx + 1] == 'l') {
+                idx++; // handle lld, lli, and llu.
+            }
             if (format[idx + 1] == 'd' || format[idx + 1] == 'i') {
                 idx += 2;
-                snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_STR, va_arg(args, LukipInt));
+                snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_STR, va_arg(*args, LukipInt));
                 concatenate_buffer(message, buffer);
             }
             else if (format[idx + 1] == 'u') {
                 idx += 2;
-                snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_STR, va_arg(args, LukipUnsigned));
+                LukipUnsigned num = va_arg(*args, LukipUnsigned);
+                snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_STR, num);
                 concatenate_buffer(message, buffer);
             }
             break;
         case 'd':
             idx++;
-            snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_STR, va_arg(args, LukipInt));
+            snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_STR, va_arg(*args, LukipInt));
             concatenate_buffer(message, buffer);
             break;
         case 'u':
             idx++;
-            snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_STR, va_arg(args, LukipUnsigned));
+            snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_STR, va_arg(*args, LukipUnsigned));
             concatenate_buffer(message, buffer);
             break;
         case 's':
             idx++;
-            sprint_int_as_bin(buffer, va_arg(args, LukipInt));
+            sprint_int_as_bin(buffer, va_arg(*args, LukipInt));
             concatenate_buffer(message, buffer);
             break;
         }
+        // TODO: handle default
     }
     message->buffer[message->length] = '\0';
 }
@@ -283,7 +288,7 @@ void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...) {
     MessageBuffer message;
     init_message_buffer(&message);
 
-    vbin_str_sprintf(&message, format, args);
+    vbin_str_sprintf(&message, format, &args);
     assert_failure(testInfo, lineInfo.line, message.buffer);
     va_end(args);
 }
@@ -344,7 +349,7 @@ void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...
     }
     va_list args;
     va_start(args, format);
-    char *message = vstrf_alloc(format, args);
+    char *message = vstrf_alloc(format, &args);
     assert_failure(testInfo, lineInfo.line, message);
     va_end(args);
 }

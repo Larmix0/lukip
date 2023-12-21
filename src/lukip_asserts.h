@@ -1,6 +1,7 @@
 #ifndef LUKIP_ASSERTS_H
 #define LUKIP_ASSERTS_H
 
+#include <inttypes.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,8 +12,8 @@
 
 #include "lukip.h"
 
-#define LUKIP_INT_STR "%ld"
-#define LUKIP_UINT_STR "%lu"
+#define LUKIP_INT_STR "%" PRId64
+#define LUKIP_UINT_STR "%" PRIu64
 
 typedef int64_t LukipInt;
 typedef uint64_t LukipUnsigned;

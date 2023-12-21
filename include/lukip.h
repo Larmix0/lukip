@@ -31,6 +31,7 @@
         "%u != %u. (Expected same unsigned int).", (val1), (val2) \
     )
 
+// TODO: make "long long equal" and other longer functions
 #define LUKIP_LONG_EQUAL(val1, val2) \
     verify_condition( \
         (val1) == (val2), LINE_INFO, \
@@ -85,28 +86,28 @@
     verify_condition( \
         (val1) == (val2), LINE_INFO, \
         "0x%X != 0x%X. (" LUKIP_INT_STR " != " LUKIP_INT_STR ", expected same hexes).", \
-        (val1), (val2), (val1), (val2) \
+        (val1), (val2), (LukipInt)(val1), (LukipInt)(val2) \
     )
 
 #define LUKIP_UHEX_EQUAL(val1, val2) \
     verify_condition( \
         (val1) == (val2), LINE_INFO, \
         "0x%X != 0x%X. (" LUKIP_UINT_STR " != " LUKIP_UINT_STR ", expected same hexes).", \
-        (val1), (val2), (val1), (val2) \
+        (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     )
 
 #define LUKIP_BINARY_EQUAL(val1, val2) \
     verify_binary( \
         (val1) == (val2), LINE_INFO, \
         "%s != %s. (" LUKIP_INT_STR " != " LUKIP_INT_STR ", Expected same binary).", \
-         (val1), (val2), (val1), (val2) \
+         (val1), (val2), (LukipInt)(val1), (LukipInt)(val2) \
     )
 
 #define LUKIP_UBINARY_EQUAL(val1, val2) \
     verify_binary( \
         (val1) == (val2), LINE_INFO, \
         "%s != %s. (" LUKIP_UINT_STR " != " LUKIP_UINT_STR ", Expected same binary).", \
-         (val1), (val2), (val1), (val2) \
+         (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     )
 
 // TODO: make it a "verify_bytes" function or create an assert_bytes_not_equal function.
@@ -135,6 +136,7 @@
         "%p != NULL. (Expected NULL).", (val) \
     )
 
+// TODO: does %s work for a general expression here??
 #define LUKIP_IS_CONDITION(val) \
     verify_condition( \
         (val) == true, LINE_INFO, \
