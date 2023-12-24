@@ -244,24 +244,23 @@ static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list
             }
             if (format[idx + 1] == 'd' || format[idx + 1] == 'i') {
                 idx += 2;
-                snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_STR, va_arg(*args, LukipInt));
+                snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_FMT, va_arg(*args, LukipInt));
                 concatenate_buffer(message, buffer);
             }
             else if (format[idx + 1] == 'u') {
                 idx += 2;
-                LukipUnsigned num = va_arg(*args, LukipUnsigned);
-                snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_STR, num);
+                snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_FMT, va_arg(*args, LukipUnsigned));
                 concatenate_buffer(message, buffer);
             }
             break;
         case 'd':
             idx++;
-            snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_STR, va_arg(*args, LukipInt));
+            snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_FMT, va_arg(*args, LukipInt));
             concatenate_buffer(message, buffer);
             break;
         case 'u':
             idx++;
-            snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_STR, va_arg(*args, LukipUnsigned));
+            snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_FMT, va_arg(*args, LukipUnsigned));
             concatenate_buffer(message, buffer);
             break;
         case 's':
@@ -293,14 +292,28 @@ void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...) {
     va_end(args);
 }
 
-void assert_bytes_equal(
-    void *array1, void *array2, const int length, LineInfo lineInfo
+static void assert_bytes_not_equal(
+    void *array1, void *array2, const int length, TestInfo info, const int line
 ) {
-    TestInfo testInfo = {
-        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
-    };
     uint8_t arr1Byte, arr2Byte;
+    for (int i = 0; i < length; i++) {
+        arr1Byte = ((uint8_t *)array1)[i]; 
+        arr2Byte = ((uint8_t *)array2)[i];
+        if (arr1Byte != arr2Byte) {
+            assert_success(info);
+            return;
+        }
+    }
+    char *message = strf_alloc(
+        "Failed because byte arrays are equal. (Expected not equal)."
+    );
+    assert_failure(info, line, message);
+}
 
+static void assert_bytes_equal(
+    void *array1, void *array2, const int length, TestInfo info, const int line
+) {
+    uint8_t arr1Byte, arr2Byte;
     for (int i = 0; i < length; i++) {
         arr1Byte = ((uint8_t *)array1)[i]; 
         arr2Byte = ((uint8_t *)array2)[i];
@@ -308,35 +321,76 @@ void assert_bytes_equal(
             continue;
         }
         char *message = strf_alloc(
-            "Failed at index %i: %u != %u. (Expected equal).", i, arr1Byte, arr2Byte
+            "Index %i: %u != %u. (Expected equal byte arrays).",
+            i, arr1Byte, arr2Byte
         );
-        assert_failure(testInfo, lineInfo.line, message);
+        assert_failure(info, line, message);
         return;
     }
-    assert_success(testInfo);
+    assert_success(info);
 }
 
-void assert_strings_equal(char *string1, char *string2, LineInfo lineInfo) {
+void verify_bytes_array(
+    void *array1, void *array2, const int length, LineInfo lineInfo, AssertOp op
+) {
     TestInfo testInfo = {
         .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
     };
+    if (op == ASSERT_EQUAL) {
+        assert_bytes_equal(array1, array2, length, testInfo, lineInfo.line);
+    } else if (op == ASSERT_NOT_EQUAL) {
+        assert_bytes_not_equal(array1, array2, length, testInfo, lineInfo.line);
+    }
+}
+
+static void assert_strings_equal(
+    char *string1, char *string2, TestInfo info, const int line
+) {
     size_t length1 = strlen(string1);
     size_t length2 = strlen(string2);
     if (length1 != length2) {
         char *message = strf_alloc(
             "Different lengths: %zu != %zu. (Expected same strings).", length1, length2
         );
-        assert_failure(testInfo, lineInfo.line, message);
+        assert_failure(info, line, message);
         return;
     }
-    if (strncmp(string1, string2, strlen(string1)) != 0) {
+    if (strncmp(string1, string2, length1) != 0) {
         char *message = strf_alloc(
             "%s != %s. (Expected same strings).", string1, string2
         );
-        assert_failure(testInfo, lineInfo.line, message);
+        assert_failure(info, line, message);
         return;
     }
-    assert_success(testInfo);
+    assert_success(info);
+}
+
+static void assert_strings_not_equal(
+    char *string1, char *string2, TestInfo info, const int line
+) {
+    if (strlen(string1) != strlen(string2)) {
+        assert_success(info);
+        return;
+    }
+    if (strncmp(string1, string2, strlen(string1)) == 0) {
+        char *message = strf_alloc(
+            "%s == %s. (Expected different strings).", string1, string2
+        );
+        assert_failure(info, line, message);
+        return;
+    }
+    assert_success(info);
+}
+
+void verify_strings(char *string1, char *string2, LineInfo lineInfo, AssertOp op) {
+    TestInfo testInfo = {
+        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
+    };
+    if (op == ASSERT_EQUAL) {
+        assert_strings_equal(string1, string2, testInfo, lineInfo.line);
+    } else if (op == ASSERT_NOT_EQUAL) {
+        assert_strings_not_equal(string1, string2, testInfo, lineInfo.line);
+    }
 }
 
 void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...) {

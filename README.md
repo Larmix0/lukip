@@ -87,12 +87,13 @@ int main() {
 ![success case](assets/success_screenshot.png)
 
 ## Why I made Lukip
-For fun as well as having a small, easy-to-use unit-testing framework in C, instead of having to install other ones. Especially because I'm personally about to start making a programming language, which will have testing.
+For fun as well as having a small, easy-to-use unit-testing framework in C,
+instead of having to install other ones. Especially because
+I'm personally about to start making a programming language, which will have testing.
 
 It was also a nice learning experience.
 
 ## Known issues
-* Binary assert functions take ints as arguments, perhaps change to int_64.
 * Missing documentation. I will add it later.
 * Needs more assertions (will be added very soon).
 * Better and more tests.

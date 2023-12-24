@@ -12,12 +12,19 @@
 
 #include "lukip.h"
 
-#define LUKIP_INT_STR "%" PRId64
-#define LUKIP_UINT_STR "%" PRIu64
+// format specifiers for LukipInt and LukipUnsigned.
+#define LUKIP_INT_FMT "%" PRId64
+#define LUKIP_UINT_FMT "%" PRIu64
 
 typedef int64_t LukipInt;
 typedef uint64_t LukipUnsigned;
+
 typedef void (*EmptyFunc)();
+
+typedef enum {
+    ASSERT_EQUAL,
+    ASSERT_NOT_EQUAL
+} AssertOp;
 
 typedef enum {
     UNKNOWN,
@@ -30,6 +37,7 @@ typedef struct {
     int line;
 } Failure;
 
+// TODO: make LineInfo manually inherit testInfo by having it as a base?
 typedef struct {
     char *fileName;
     char *funcName;
@@ -74,9 +82,10 @@ void make_tear_down(const EmptyFunc newTearDown);
 
 void test_func(const EmptyFunc funcToTest, LineInfo caller);
 
-void assert_bytes_equal(void *array1, void *array2, const int length, LineInfo lineInfo);
-void assert_strings_equal(char *string1, char *string2, LineInfo lineInfo);
-
+void verify_bytes_array(
+    void *array1, void *array2, const int length, LineInfo lineInfo, AssertOp op
+);
+void verify_strings(char *string1, char *string2, LineInfo lineInfo, AssertOp op);
 void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...);
 void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...);
 
