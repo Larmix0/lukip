@@ -9,7 +9,6 @@
 #define GROW_CAPACITY(capacity) ((capacity) < 16 ? 16 : (capacity) * 2)
 #define BUFFER_LENGTH 256
 
-// TODO: ensure static and const correctness
 typedef struct {
     int capacity;
     int length;
@@ -105,8 +104,8 @@ char *strf_alloc(const char *format, ...) {
     return message;
 }
 
-static void concatenate_buffer(MessageBuffer *dest, char *src) {
-    int srcLength = strlen(src);
+static void concatenate_buffer(MessageBuffer *dest, const char *src) {
+    const int srcLength = strlen(src);
 
     if (dest->length + srcLength + 1 >= dest->capacity) {
         dest->capacity += srcLength * 2;
@@ -128,12 +127,12 @@ static void reverse_string(char *string) {
 }
 
 static void sprint_int_as_bin(char *string, LukipInt value) {
-    const int BYTE_SIZE = 8;
+    const int byte_size = 8;
     int bitsCopied = 0, length = 0;
 
     while (value != 0) {
         // add white space every byte
-        if (bitsCopied % BYTE_SIZE == 0 && bitsCopied != 0) {
+        if (bitsCopied % byte_size == 0 && bitsCopied != 0) {
             string[length++] = ' ';
         }
         // add bit from the very right
@@ -142,7 +141,7 @@ static void sprint_int_as_bin(char *string, LukipInt value) {
         value >>= 1; // read next bit
     }
     // pad remaining bits
-    while (bitsCopied % BYTE_SIZE != 0) {
+    while (bitsCopied % byte_size != 0) {
         string[length++] = '0';
         bitsCopied++;
     }
@@ -162,19 +161,7 @@ static void append_test(const TestFunc newTest) {
     lukip.tests[lukip.testsLength++] = newTest;
 }
 
-static void append_failure(const Failure failure) {
-    TestFunc *testFunc = &lukip.tests[lukip.testsLength - 1];
-
-    if (testFunc->failsCapacity < testFunc->failsLength + 1) {
-        testFunc->failsCapacity = GROW_CAPACITY(testFunc->failsCapacity);
-        testFunc->failures = reallocate(
-            testFunc->failures, testFunc->failsCapacity, sizeof(Failure)
-        );
-    }
-    testFunc->failures[testFunc->failsLength++] = failure;
-}
-
-void test_func(const EmptyFunc funcToTest, LineInfo caller) {
+void test_func(const EmptyFunc funcToTest, const LineInfo caller) {
     if (lukip.setUp != NULL) {
         lukip.setUp();
     }
@@ -187,6 +174,18 @@ void test_func(const EmptyFunc funcToTest, LineInfo caller) {
     if (lukip.tearDown != NULL) {
         lukip.tearDown();
     }
+}
+
+static void append_failure(Failure failure) {
+    TestFunc *testFunc = &lukip.tests[lukip.testsLength - 1];
+
+    if (testFunc->failsCapacity < testFunc->failsLength + 1) {
+        testFunc->failsCapacity = GROW_CAPACITY(testFunc->failsCapacity);
+        testFunc->failures = reallocate(
+            testFunc->failures, testFunc->failsCapacity, sizeof(Failure)
+        );
+    }
+    testFunc->failures[testFunc->failsLength++] = failure;
 }
 
 static void assert_success(const FuncInfo newInfo) {
@@ -224,7 +223,7 @@ void make_tear_down(const EmptyFunc newTearDown) {
 }
 
 static void variadic_verify_condition(
-    bool condition, LineInfo info, const char *format, va_list *args
+    const bool condition, const LineInfo info, const char *format, va_list *args
 ) {
     if (condition) {
         assert_success(info.testInfo);
@@ -234,7 +233,7 @@ static void variadic_verify_condition(
     assert_failure(info, message);
 }
 
-void verify_condition(bool condition, LineInfo info, const char *format, ...) {
+void verify_condition(const bool condition, const LineInfo info, const char *format, ...) {
     va_list args;
     va_start(args, format);
     variadic_verify_condition(condition, info, format, &args);
@@ -292,7 +291,7 @@ static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list
     message->buffer[message->length] = '\0';
 }
 
-void verify_binary(bool condition, LineInfo info, const char *format, ...) {
+void verify_binary(const bool condition, const LineInfo info, const char *format, ...) {
     if (condition) {
         assert_success(info.testInfo);
         return;
@@ -307,9 +306,11 @@ void verify_binary(bool condition, LineInfo info, const char *format, ...) {
     va_end(args);
 }
 
-static void assert_strings_equal(char *string1, char *string2, LineInfo info) {
-    size_t length1 = strlen(string1);
-    size_t length2 = strlen(string2);
+static void assert_strings_equal(
+    const char *string1, const char *string2, const LineInfo info
+) {
+    const size_t length1 = strlen(string1);
+    const size_t length2 = strlen(string2);
     if (length1 != length2) {
         char *message = strf_alloc(
             "Different lengths: %zu != %zu. (Expected same strings).", length1, length2
@@ -327,7 +328,9 @@ static void assert_strings_equal(char *string1, char *string2, LineInfo info) {
     assert_success(info.testInfo);
 }
 
-static void assert_strings_not_equal(char *string1, char *string2, LineInfo info) {
+static void assert_strings_not_equal(
+    const char *string1, const char *string2, const LineInfo info
+) {
     if (strlen(string1) != strlen(string2)) {
         assert_success(info.testInfo);
         return;
@@ -342,7 +345,9 @@ static void assert_strings_not_equal(char *string1, char *string2, LineInfo info
     assert_success(info.testInfo);
 }
 
-void verify_strings(char *string1, char *string2, LineInfo info, AssertOp op) {
+void verify_strings(
+    const char *string1, const char *string2, const LineInfo info, const AssertOp op
+) {
     if (op == ASSERT_EQUAL) {
         assert_strings_equal(string1, string2, info);
     } else if (op == ASSERT_NOT_EQUAL) {
@@ -351,7 +356,7 @@ void verify_strings(char *string1, char *string2, LineInfo info, AssertOp op) {
 }
 
 static void assert_bytes_not_equal(
-    void *array1, void *array2, const int length, LineInfo info
+    const void *array1, const void *array2, const int length, const LineInfo info
 ) {
     uint8_t arr1Byte, arr2Byte;
     for (int i = 0; i < length; i++) {
@@ -369,7 +374,7 @@ static void assert_bytes_not_equal(
 }
 
 static void assert_bytes_equal(
-    void *array1, void *array2, const int length, LineInfo info
+    const void *array1, const void *array2, const int length, const LineInfo info
 ) {
     uint8_t arr1Byte, arr2Byte;
     for (int i = 0; i < length; i++) {
@@ -389,7 +394,8 @@ static void assert_bytes_equal(
 }
 
 void verify_bytes_array(
-    void *array1, void *array2, const int length, LineInfo info, AssertOp op
+    const void *array1, const void *array2, const int length,
+    const LineInfo info, const AssertOp op
 ) {
     if (op == ASSERT_EQUAL) {
         assert_bytes_equal(array1, array2, length, info);
@@ -399,8 +405,8 @@ void verify_bytes_array(
 }
 
 void verify_precision(
-    LukipFloat float1, LukipFloat float2, const int digitPrecision,
-    LineInfo info, AssertOp op, const char *format, ...
+    const LukipFloat float1, const LukipFloat float2, const int digitPrecision,
+    const LineInfo info, const AssertOp op, const char *format, ...
 ) {
     double acceptableDifference = 0.1;
     double realDifference = float1 - float2;
@@ -412,7 +418,7 @@ void verify_precision(
     for (int i = 0; i < digitPrecision - 1; i++) {
         acceptableDifference *= 0.1;
     }
-    bool withinPrecision = realDifference <= acceptableDifference ? true : false;
+    const bool withinPrecision = realDifference <= acceptableDifference ? true : false;
     va_list args;
     va_start(args, format);
 

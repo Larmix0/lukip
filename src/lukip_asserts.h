@@ -34,7 +34,6 @@ typedef enum {
     ASSERT_NOT_EQUAL
 } AssertOp;
 
-// TODO: place some of these inside lukip_asserts.c?
 typedef enum {
     UNKNOWN,
     SUCCESS,
@@ -43,8 +42,8 @@ typedef enum {
 
 typedef struct {
     TestStatus status;
-    char *fileName;
-    char *funcName;
+    const char *fileName;
+    const char *funcName;
 } FuncInfo;
 
 typedef struct {
@@ -87,17 +86,20 @@ void make_test_suite(const EmptyFunc newSetUp, const EmptyFunc newTearDown);
 void make_set_up(const EmptyFunc newSetUp);
 void make_tear_down(const EmptyFunc newTearDown);
 
-void test_func(const EmptyFunc funcToTest, LineInfo caller);
+void test_func(const EmptyFunc funcToTest, const LineInfo caller);
 
-void verify_condition(bool condition, LineInfo info, const char *format, ...);
-void verify_binary(bool condition, LineInfo info, const char *format, ...);
-void verify_strings(char *string1, char *string2, LineInfo info, AssertOp op);
+void verify_condition(const bool condition, const LineInfo info, const char *format, ...);
+void verify_binary(const bool condition, const LineInfo info, const char *format, ...);
+void verify_strings(
+    const char *string1, const char *string2, const LineInfo info, const AssertOp op
+);
 void verify_bytes_array(
-    void *array1, void *array2, const int length, LineInfo info, AssertOp op
+    const void *array1, const void *array2, const int length,
+    const LineInfo info, const AssertOp op
 );
 void verify_precision(
-    LukipFloat float1, LukipFloat float2, const int digitPrecision,
-    LineInfo info, AssertOp op, const char *format, ...
+    const LukipFloat float1, const LukipFloat float2, const int digitPrecision,
+    const LineInfo info, const AssertOp op, const char *format, ...
 );
 
 #endif

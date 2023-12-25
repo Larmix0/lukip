@@ -9,7 +9,7 @@
 #define GREEN "\033[1;32m"
 #define YELLOW "\033[1;33m"
 
-static void long_line(char lineChar) {
+static void long_line(const char lineChar) {
     for (int i = 0; i < LONG_LINE_LENGTH; i++) {
         putchar(lineChar);
     }
@@ -18,7 +18,7 @@ static void long_line(char lineChar) {
 
 static void long_line_message(char lineChar, char *message, char *mode) {
     // -2 to account for bracket and space
-    int halfLineLength = (LONG_LINE_LENGTH / 2) - 2 - (strlen(message) / 2);
+    const int halfLineLength = (LONG_LINE_LENGTH / 2) - 2 - (strlen(message) / 2);
     for (int i = 0; i < halfLineLength; i++) {
         putchar(lineChar);
     }
@@ -29,14 +29,14 @@ static void long_line_message(char lineChar, char *message, char *mode) {
     putchar('\n');
 }
 
-static void show_warnings(LukipUnit *lukip) {
+static void show_warnings(const LukipUnit *lukip) {
     bool hadWarnings = false;
     for (int i = 0; i < lukip->testsLength; i++) {
         if (lukip->tests[i].info.status != UNKNOWN) {
             continue; // no need to warn
         }
         hadWarnings = true;
-        LineInfo *caller = &lukip->tests[i].caller;
+        const LineInfo *caller = &lukip->tests[i].caller;
         printf("[" YELLOW "WARNING" DEFAULT "] ");
         printf(
             "Function called in line %d: %s|%s() had no assertions.\n",
@@ -48,9 +48,9 @@ static void show_warnings(LukipUnit *lukip) {
     }
 }
 
-static void errors_info(LukipUnit *lukip) {
+static void errors_info(const LukipUnit *lukip) {
     for (int i = 0; i < lukip->testsLength; i++) {
-        TestFunc *test = &lukip->tests[i];
+        const TestFunc *test = &lukip->tests[i];
         if (test->info.status != FAILURE) {
             continue;
         }
@@ -67,7 +67,7 @@ static void errors_info(LukipUnit *lukip) {
     }
 }
 
-static void show_fail(LukipUnit *lukip, double executionTime) {
+static void show_fail(const LukipUnit *lukip, const double executionTime) {
     int failures = 0;
     for (int i = 0; i < lukip->testsLength; i++) {
         if (lukip->tests[i].info.status == FAILURE) {
@@ -91,7 +91,7 @@ static void show_fail(LukipUnit *lukip, double executionTime) {
     free(failMessage);
 }
 
-static void show_success(LukipUnit *lukip, double executionTime) {
+static void show_success(const LukipUnit *lukip, const double executionTime) {
     for (int i = 0; i < lukip->testsLength; i++) {
         lukip->tests[i].info.status == SUCCESS ? putchar('.') : putchar('?');
     }
@@ -109,13 +109,13 @@ static void show_success(LukipUnit *lukip, double executionTime) {
     free(successMessage);
 }
 
-void show_results(LukipUnit *lukip) {
+void show_results(const LukipUnit *lukip) {
     printf("\n\n\n");
     long_line('-');
     show_warnings(lukip);
 
-    clock_t endTime = clock();
-    double executionTime = (double)(endTime - lukip->startTime) / CLOCKS_PER_SEC;
+    const clock_t endTime = clock();
+    const double executionTime = (double)(endTime - lukip->startTime) / CLOCKS_PER_SEC;
     if (lukip->successful) {
         show_success(lukip, executionTime);
     } else {
