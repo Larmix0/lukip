@@ -10,7 +10,6 @@
 #define BUFFER_LENGTH 256
 
 // TODO: ensure static and const correctness
-
 typedef struct {
     int capacity;
     int length;
@@ -19,6 +18,12 @@ typedef struct {
 
 static char buffer[BUFFER_LENGTH];
 static LukipUnit lukip;
+
+static void free_failure_messages(TestFunc *failedFunc) {
+    for (int i = 0; i < failedFunc->failsLength; i++) {
+        free(failedFunc->failures[i].message);
+    }
+}
 
 void init_lukip() {
     lukip.testsCapacity = 0;
@@ -29,6 +34,17 @@ void init_lukip() {
     lukip.tearDown = NULL;
     lukip.startTime = clock();
     lukip.successful = true;
+}
+
+void end_lukip() {
+    show_results(lukip);
+    for (int i = 0; i < lukip.testsLength; i++) {
+        if (lukip.tests[i].info.status == FAILURE) {
+            free_failure_messages(&lukip.tests[i]);
+            free(lukip.tests[i].failures);
+        }
+    }
+    free(lukip.tests);
 }
 
 static void init_test_info(FuncInfo *info) {
@@ -101,7 +117,7 @@ static void concatenate_buffer(MessageBuffer *dest, char *src) {
     dest->length += srcLength;
 }
 
-void reverse_string(char *string) {
+static void reverse_string(char *string) {
     const int length = strlen(string);
     char tmp;
     for (int i = 0; i < length / 2; i++) {
@@ -134,23 +150,6 @@ static void sprint_int_as_bin(char *string, LukipInt value) {
     // so we have to reverse the result in order to have bytes in the correct order.
     string[length] = '\0';
     reverse_string(string);
-}
-
-static void free_failure_messages(TestFunc *failedFunc) {
-    for (int i = 0; i < failedFunc->failsLength; i++) {
-        free(failedFunc->failures[i].message);
-    }
-}
-
-void end_lukip() {
-    show_results(lukip);
-    for (int i = 0; i < lukip.testsLength; i++) {
-        if (lukip.tests[i].info.status == FAILURE) {
-            free_failure_messages(&lukip.tests[i]);
-            free(lukip.tests[i].failures);
-        }
-    }
-    free(lukip.tests);
 }
 
 static void append_test(const TestFunc newTest) {

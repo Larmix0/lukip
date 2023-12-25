@@ -42,11 +42,6 @@ typedef enum {
 } TestStatus;
 
 typedef struct {
-    char *message;
-    int line;
-} Failure;
-
-typedef struct {
     TestStatus status;
     char *fileName;
     char *funcName;
@@ -56,6 +51,11 @@ typedef struct {
     FuncInfo testInfo;
     int line;
 } LineInfo;
+
+typedef struct {
+    char *message;
+    int line;
+} Failure;
 
 typedef struct {
     int failsCapacity;

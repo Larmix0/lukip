@@ -48,19 +48,17 @@ static void show_warnings(LukipUnit lukip) {
 
 static void errors_info(LukipUnit lukip) {
     for (int i = 0; i < lukip.testsLength; i++) {
-        TestFunc *test = &lukip.tests[i];
-        
-        if (test->info.status != FAILURE) {
+        if (lukip.tests[i].info.status != FAILURE) {
             continue;
         }
-        for (int j = 0; j < test->failsLength; j++) {
+        for (int j = 0; j < lukip.tests[i].failsLength; j++) {
             printf("[" RED "FAIL" DEFAULT "] ");
             printf(
                 "Line %d: %s|%s(): \"%s\"\n",
-                test->failures[j].line,
-                test->info.fileName,
-                test->info.funcName,
-                test->failures[j].message
+                lukip.tests[i].failures[j].line,
+                lukip.tests[i].info.fileName,
+                lukip.tests[i].info.funcName,
+                lukip.tests[i].failures[j].message
             );
         }
     }
