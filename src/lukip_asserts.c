@@ -104,7 +104,7 @@ char *strf_alloc(const char *format, ...) {
     return message;
 }
 
-static void append_dynamic_message(DynamicMessage *message, const char *string) {
+static void append_message_string(DynamicMessage *message, const char *string) {
     const int srcLength = strlen(string);
 
     if (message->length + srcLength + 1 >= message->capacity) {
@@ -239,7 +239,7 @@ void verify_condition(const bool condition, const LineInfo info, const char *for
     va_end(args);
 }
 
-static void append_dynamic_message(DynamicMessage *message, char ch) {
+static void append_message_char(DynamicMessage *message, char ch) {
     // + 2 to always have space for NUL.
     if (message->length + 2 >= message->capacity) {
         message->capacity = GROW_CAPACITY(message->capacity);
@@ -254,7 +254,7 @@ static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_lis
     int idx = 0;
     while (format[idx] != '\0') {
         if (format[idx] != '%') {
-            append_dynamic_message(message, format[idx++]);
+            append_message_char(message, format[idx++]);
             continue;
         }
         idx++;
@@ -266,27 +266,27 @@ static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_lis
             if (format[idx + 1] == 'd' || format[idx + 1] == 'i') {
                 idx += 2;
                 snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_FMT, va_arg(*args, LukipInt));
-                append_dynamic_message(message, buffer);
+                append_message_string(message, buffer);
             } else if (format[idx + 1] == 'u') {
                 idx += 2;
                 snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_FMT, va_arg(*args, LukipUnsigned));
-                append_dynamic_message(message, buffer);
+                append_message_string(message, buffer);
             }
             break;
         case 'd':
             idx++;
             snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_FMT, va_arg(*args, LukipInt));
-            append_dynamic_message(message, buffer);
+            append_message_string(message, buffer);
             break;
         case 'u':
             idx++;
             snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_FMT, va_arg(*args, LukipUnsigned));
-            append_dynamic_message(message, buffer);
+            append_message_string(message, buffer);
             break;
         case 's':
             idx++;
             sprint_int_as_bin(buffer, va_arg(*args, LukipInt));
-            append_dynamic_message(message, buffer);
+            append_message_string(message, buffer);
             break;
         }
     }
