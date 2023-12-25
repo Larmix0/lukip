@@ -38,7 +38,7 @@ static void show_warnings(LukipUnit lukip) {
         printf("[" YELLOW "WARNING" DEFAULT "] ");
         printf(
             "Function called in line %d: %s|%s() had no assertions.\n",
-            caller->line, caller->fileName, caller->funcName
+            caller->line, caller->testInfo.fileName, caller->testInfo.funcName
         );
     }
     if (hadWarnings) {

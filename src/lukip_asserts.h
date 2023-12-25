@@ -17,6 +17,12 @@
 #define LUKIP_UINT_FMT "%" PRIu64
 #define LUKIP_FLOAT_FMT "%lf"
 
+#define LINE_INFO \
+    (LineInfo){ \
+        (FuncInfo){.status=UNKNOWN, .fileName=__FILE__, .funcName=(char *)__func__}, \
+        .line=__LINE__, \
+    }
+
 typedef int64_t LukipInt;
 typedef uint64_t LukipUnsigned;
 typedef double LukipFloat;
@@ -40,18 +46,16 @@ typedef struct {
     int line;
 } Failure;
 
-// TODO: make LineInfo manually inherit testInfo by having it as a base?
-typedef struct {
-    char *fileName;
-    char *funcName;
-    int line;
-} LineInfo;
-
 typedef struct {
     TestStatus status;
     char *fileName;
     char *funcName;
-} TestInfo;
+} FuncInfo;
+
+typedef struct {
+    FuncInfo testInfo;
+    int line;
+} LineInfo;
 
 typedef struct {
     int failsCapacity;
@@ -59,7 +63,7 @@ typedef struct {
     Failure *failures;
 
     LineInfo caller;
-    TestInfo info;
+    FuncInfo info;
     EmptyFunc testFunc;
 } TestFunc;
 
@@ -85,15 +89,15 @@ void make_tear_down(const EmptyFunc newTearDown);
 
 void test_func(const EmptyFunc funcToTest, LineInfo caller);
 
-void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...);
-void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...);
-void verify_strings(char *string1, char *string2, LineInfo lineInfo, AssertOp op);
+void verify_condition(bool condition, LineInfo info, const char *format, ...);
+void verify_binary(bool condition, LineInfo info, const char *format, ...);
+void verify_strings(char *string1, char *string2, LineInfo info, AssertOp op);
 void verify_bytes_array(
-    void *array1, void *array2, const int length, LineInfo lineInfo, AssertOp op
+    void *array1, void *array2, const int length, LineInfo info, AssertOp op
 );
 void verify_precision(
     LukipFloat float1, LukipFloat float2, const int digitPrecision,
-    LineInfo lineInfo, AssertOp op, const char *format, ...
+    LineInfo info, AssertOp op, const char *format, ...
 );
 
 #endif

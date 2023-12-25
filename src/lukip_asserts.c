@@ -31,7 +31,7 @@ void init_lukip() {
     lukip.successful = true;
 }
 
-static void init_test_info(TestInfo *info) {
+static void init_test_info(FuncInfo *info) {
     info->status = UNKNOWN;
     info->fileName = NULL;
     info->funcName = NULL;
@@ -39,8 +39,7 @@ static void init_test_info(TestInfo *info) {
 
 static void init_line_info(LineInfo *info) {
     info->line = 0;
-    info->fileName = NULL;
-    info->funcName = NULL;
+    init_test_info(&info->testInfo);
 }
 
 static void init_test(TestFunc *test) {
@@ -191,8 +190,8 @@ void test_func(const EmptyFunc funcToTest, LineInfo caller) {
     }
 }
 
-static void assert_success(const TestInfo newInfo) {
-    TestInfo *info = &lukip.tests[lukip.testsLength - 1].info;
+static void assert_success(const FuncInfo newInfo) {
+    FuncInfo *info = &lukip.tests[lukip.testsLength - 1].info;
     if (info->status == UNKNOWN) {
         info->fileName = newInfo.fileName;
         info->funcName = newInfo.funcName;
@@ -200,15 +199,15 @@ static void assert_success(const TestInfo newInfo) {
     }
 }
 
-static void assert_failure(const TestInfo newInfo, const int line, char *message) {
-    TestInfo *info = &lukip.tests[lukip.testsLength - 1].info;
+static void assert_failure(const LineInfo newInfo, char *message) {
+    FuncInfo *info = &lukip.tests[lukip.testsLength - 1].info;
     if (info->status == UNKNOWN) {
-        info->fileName = newInfo.fileName;
-        info->funcName = newInfo.funcName;
+        info->fileName = newInfo.testInfo.fileName;
+        info->funcName = newInfo.testInfo.funcName;
     }
     lukip.successful = false;
     info->status = FAILURE;
-    Failure failure = {.line=line, .message=message};
+    Failure failure = {.line=newInfo.line, .message=message};
     append_failure(failure);
 }
 
@@ -226,23 +225,20 @@ void make_tear_down(const EmptyFunc newTearDown) {
 }
 
 static void variadic_verify_condition(
-    bool condition, LineInfo lineInfo, const char *format, va_list *args
+    bool condition, LineInfo info, const char *format, va_list *args
 ) {
-    TestInfo testInfo = {
-        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
-    };
     if (condition) {
-        assert_success(testInfo);
+        assert_success(info.testInfo);
         return;
     }
     char *message = vstrf_alloc(format, args);
-    assert_failure(testInfo, lineInfo.line, message);
+    assert_failure(info, message);
 }
 
-void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...) {
+void verify_condition(bool condition, LineInfo info, const char *format, ...) {
     va_list args;
     va_start(args, format);
-    variadic_verify_condition(condition, lineInfo, format, &args);
+    variadic_verify_condition(condition, info, format, &args);
     va_end(args);
 }
 
@@ -293,17 +289,13 @@ static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list
             concatenate_buffer(message, buffer);
             break;
         }
-        // TODO: handle default
     }
     message->buffer[message->length] = '\0';
 }
 
-void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...) {
-    TestInfo testInfo = {
-        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
-    };
+void verify_binary(bool condition, LineInfo info, const char *format, ...) {
     if (condition) {
-        assert_success(testInfo);
+        assert_success(info.testInfo);
         return;
     }
     va_list args;
@@ -312,80 +304,73 @@ void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...) {
     init_message_buffer(&message);
 
     vbin_str_sprintf(&message, format, &args);
-    assert_failure(testInfo, lineInfo.line, message.buffer);
+    assert_failure(info, message.buffer);
     va_end(args);
 }
 
-static void assert_strings_equal(
-    char *string1, char *string2, TestInfo info, const int line
-) {
+static void assert_strings_equal(char *string1, char *string2, LineInfo info) {
     size_t length1 = strlen(string1);
     size_t length2 = strlen(string2);
     if (length1 != length2) {
         char *message = strf_alloc(
             "Different lengths: %zu != %zu. (Expected same strings).", length1, length2
         );
-        assert_failure(info, line, message);
+        assert_failure(info, message);
         return;
     }
     if (strncmp(string1, string2, length1) != 0) {
         char *message = strf_alloc(
             "%s != %s. (Expected same strings).", string1, string2
         );
-        assert_failure(info, line, message);
+        assert_failure(info, message);
         return;
     }
-    assert_success(info);
+    assert_success(info.testInfo);
 }
 
-static void assert_strings_not_equal(
-    char *string1, char *string2, TestInfo info, const int line
-) {
+static void assert_strings_not_equal(char *string1, char *string2, LineInfo info) {
     if (strlen(string1) != strlen(string2)) {
-        assert_success(info);
+        assert_success(info.testInfo);
         return;
     }
     if (strncmp(string1, string2, strlen(string1)) == 0) {
         char *message = strf_alloc(
             "%s == %s. (Expected different strings).", string1, string2
         );
-        assert_failure(info, line, message);
+        assert_failure(info, message);
         return;
     }
-    assert_success(info);
+    assert_success(info.testInfo);
 }
 
-void verify_strings(char *string1, char *string2, LineInfo lineInfo, AssertOp op) {
-    TestInfo testInfo = {
-        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
-    };
+void verify_strings(char *string1, char *string2, LineInfo info, AssertOp op) {
     if (op == ASSERT_EQUAL) {
-        assert_strings_equal(string1, string2, testInfo, lineInfo.line);
+        assert_strings_equal(string1, string2, info);
     } else if (op == ASSERT_NOT_EQUAL) {
-        assert_strings_not_equal(string1, string2, testInfo, lineInfo.line);
+        assert_strings_not_equal(string1, string2, info);
     }
 }
 
 static void assert_bytes_not_equal(
-    void *array1, void *array2, const int length, TestInfo info, const int line
+    void *array1, void *array2, const int length, LineInfo info
 ) {
     uint8_t arr1Byte, arr2Byte;
     for (int i = 0; i < length; i++) {
         arr1Byte = ((uint8_t *)array1)[i]; 
         arr2Byte = ((uint8_t *)array2)[i];
         if (arr1Byte != arr2Byte) {
-            assert_success(info);
+            assert_success(info.testInfo);
             return;
         }
     }
     char *message = strf_alloc(
         "Failed because byte arrays are equal. (Expected not equal)."
     );
-    assert_failure(info, line, message);
+    assert_failure(info, message);
 }
 
 static void assert_bytes_equal(
-    void *array1, void *array2, const int length, TestInfo info, const int line
+    void *array1, void *array2, const int length, LineInfo info
 ) {
     uint8_t arr1Byte, arr2Byte;
     for (int i = 0; i < length; i++) {
@@ -398,28 +383,25 @@ static void assert_bytes_equal(
             "Index %i: %u != %u. (Expected equal byte arrays).",
             i, arr1Byte, arr2Byte
         );
-        assert_failure(info, line, message);
+        assert_failure(info, message);
         return;
     }
-    assert_success(info);
+    assert_success(info.testInfo);
 }
 
 void verify_bytes_array(
-    void *array1, void *array2, const int length, LineInfo lineInfo, AssertOp op
+    void *array1, void *array2, const int length, LineInfo info, AssertOp op
 ) {
-    TestInfo testInfo = {
-        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
-    };
     if (op == ASSERT_EQUAL) {
-        assert_bytes_equal(array1, array2, length, testInfo, lineInfo.line);
+        assert_bytes_equal(array1, array2, length, info);
     } else if (op == ASSERT_NOT_EQUAL) {
-        assert_bytes_not_equal(array1, array2, length, testInfo, lineInfo.line);
+        assert_bytes_not_equal(array1, array2, length, info);
     }
 }
 
 void verify_precision(
     LukipFloat float1, LukipFloat float2, const int digitPrecision,
-    LineInfo lineInfo, AssertOp op, const char *format, ...
+    LineInfo info, AssertOp op, const char *format, ...
 ) {
     double acceptableDifference = 0.1;
     double realDifference = float1 - float2;
@@ -436,9 +418,9 @@ void verify_precision(
     va_start(args, format);
 
     if (op == ASSERT_EQUAL) {
-        variadic_verify_condition(withinPrecision, lineInfo, format, &args);
+        variadic_verify_condition(withinPrecision, info, format, &args);
     } else if (op == ASSERT_NOT_EQUAL) {
-        variadic_verify_condition(!withinPrecision, lineInfo, format, &args);
+        variadic_verify_condition(!withinPrecision, info, format, &args);
     }
     va_end(args);
 }

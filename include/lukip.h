@@ -15,9 +15,6 @@
 #define MAKE_TEST_SUITE(setUpFunc, tearDownFunc) \
     make_test_suite(setUpFunc, tearDownFunc)
 
-#define LINE_INFO \
-    (LineInfo){.fileName=__FILE__, .funcName=(char *)__func__, .line=__LINE__,}
-
 #define TEST(FuncToTest) test_func(FuncToTest, LINE_INFO)
 
 #define LUKIP_INT_EQUAL(val1, val2) \
