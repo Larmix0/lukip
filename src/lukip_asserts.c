@@ -13,7 +13,7 @@ typedef struct {
     int capacity;
     int length;
     char *buffer;
-} MessageBuffer;
+} DynamicMessage;
 
 static char buffer[BUFFER_LENGTH];
 static LukipUnit lukip;
@@ -66,7 +66,7 @@ static void init_test(TestFunc *test) {
     init_line_info(&test->caller);
 }
 
-static void init_message_buffer(MessageBuffer *message) {
+static void init_dynamic_message(DynamicMessage *message) {
     message->length = 0;
     message->capacity = 0;
     message->buffer = NULL;
@@ -104,16 +104,16 @@ char *strf_alloc(const char *format, ...) {
     return message;
 }
 
-static void concatenate_buffer(MessageBuffer *dest, const char *src) {
-    const int srcLength = strlen(src);
+static void append_dynamic_message(DynamicMessage *message, const char *string) {
+    const int srcLength = strlen(string);
 
-    if (dest->length + srcLength + 1 >= dest->capacity) {
-        dest->capacity += srcLength * 2;
-        dest->buffer = reallocate(dest->buffer, dest->capacity, sizeof(char));
+    if (message->length + srcLength + 1 >= message->capacity) {
+        message->capacity += srcLength * 2;
+        message->buffer = reallocate(message->buffer, message->capacity, sizeof(char));
     }
-    dest->buffer[dest->length] = '\0';
-    strncat(dest->buffer, src, srcLength);
-    dest->length += srcLength;
+    message->buffer[message->length] = '\0';
+    strncat(message->buffer, string, srcLength);
+    message->length += srcLength;
 }
 
 static void reverse_string(char *string) {
@@ -145,8 +145,7 @@ static void sprint_int_as_bin(char *string, LukipInt value) {
         string[length++] = '0';
         bitsCopied++;
     }
-    // we were copying bits from right, but strings go from left to right
-    // so we have to reverse the result in order to have bytes in the correct order.
+    // we were copying right to left, but strings go from left to right, so reverse.
     string[length] = '\0';
     reverse_string(string);
 }
@@ -240,18 +239,22 @@ void verify_condition(const bool condition, const LineInfo info, const char *for
     va_end(args);
 }
 
-static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list *args) {
+static void append_dynamic_message(DynamicMessage *message, char ch) {
+    // + 2 to always have space for NUL.
+    if (message->length + 2 >= message->capacity) {
+        message->capacity = GROW_CAPACITY(message->capacity);
+        message->buffer = reallocate(
+            message->buffer, message->capacity, sizeof(char)
+        );
+    }
+    message->buffer[message->length++] = ch;
+}
+
+static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_list *args) {
     int idx = 0;
     while (format[idx] != '\0') {
         if (format[idx] != '%') {
-            // + 2 to always have space for NUL.
-            if (message->length + 2 >= message->capacity) {
-                message->capacity = GROW_CAPACITY(message->capacity);
-                message->buffer = reallocate(
-                    message->buffer, message->capacity, sizeof(char)
-                );
-            }
-            message->buffer[message->length++] = format[idx++];
+            append_dynamic_message(message, format[idx++]);
             continue;
         }
         idx++;
@@ -263,28 +266,27 @@ static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list
             if (format[idx + 1] == 'd' || format[idx + 1] == 'i') {
                 idx += 2;
                 snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_FMT, va_arg(*args, LukipInt));
-                concatenate_buffer(message, buffer);
-            }
-            else if (format[idx + 1] == 'u') {
+                append_dynamic_message(message, buffer);
+            } else if (format[idx + 1] == 'u') {
                 idx += 2;
                 snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_FMT, va_arg(*args, LukipUnsigned));
-                concatenate_buffer(message, buffer);
+                append_dynamic_message(message, buffer);
             }
             break;
         case 'd':
             idx++;
             snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_FMT, va_arg(*args, LukipInt));
-            concatenate_buffer(message, buffer);
+            append_dynamic_message(message, buffer);
             break;
         case 'u':
             idx++;
             snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_FMT, va_arg(*args, LukipUnsigned));
-            concatenate_buffer(message, buffer);
+            append_dynamic_message(message, buffer);
             break;
         case 's':
             idx++;
             sprint_int_as_bin(buffer, va_arg(*args, LukipInt));
-            concatenate_buffer(message, buffer);
+            append_dynamic_message(message, buffer);
             break;
         }
     }
@@ -298,10 +300,10 @@ void verify_binary(const bool condition, const LineInfo info, const char *format
     }
     va_list args;
     va_start(args, format);
-    MessageBuffer message;
-    init_message_buffer(&message);
+    DynamicMessage message;
+    init_dynamic_message(&message);
 
-    vbin_str_sprintf(&message, format, &args);
+    bin_str_vsprintf(&message, format, &args);
     assert_failure(info, message.buffer);
     va_end(args);
 }
