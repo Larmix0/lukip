@@ -3,6 +3,6 @@
 
 #include "lukip_asserts.h"
 
-void show_results(LukipUnit lukip);
+void show_results(LukipUnit *lukip);
 
 #endif

@@ -37,7 +37,7 @@ void init_lukip() {
 }
 
 void end_lukip() {
-    show_results(lukip);
+    show_results(&lukip);
     for (int i = 0; i < lukip.testsLength; i++) {
         if (lukip.tests[i].info.status == FAILURE) {
             free_failure_messages(&lukip.tests[i]);
