@@ -20,8 +20,6 @@
 
 #define TEST(FuncToTest) test_func(FuncToTest, LINE_INFO)
 
-// TODO: add precision-based floats (almost_equal) 
-
 #define LUKIP_INT_EQUAL(val1, val2) \
     verify_condition((val1) == (val2), LINE_INFO, "%d Does not equal %d.", (val1), (val2))
 
@@ -674,6 +672,13 @@
     )
 
 // Things that don't have comparisons (only equal and not equal).
+#define LUKIP_EQUAL_WITHIN(val1, val2, precision) \
+    verify_precision( \
+        val1, val2, precision, LINE_INFO, ASSERT_EQUAL, \
+        LUKIP_FLOAT_FMT " Does not equal " LUKIP_FLOAT_FMT " within %d places.", \
+        (LukipFloat)(val1), (LukipFloat)(val2), (precision), ASSERT_EQUAL \
+    )
+
 #define LUKIP_CHAR_EQUAL(val1, val2) \
     verify_condition((val1) == (val2), LINE_INFO, "%c Does not equal %c.", (val1), (val2))
 
@@ -703,6 +708,13 @@
 #define LUKIP_IS_NULL(val) \
     verify_condition((val) == NULL, LINE_INFO, "%p Does not equal NULL.", (val))
 
+#define LUKIP_NOT_EQUAL_WITHIN(val1, val2, precision) \
+    verify_precision( \
+        val1, val2, precision, LINE_INFO, ASSERT_NOT_EQUAL, \
+        LUKIP_FLOAT_FMT " Is not different from " LUKIP_FLOAT_FMT " within %d places.", \
+        (LukipFloat)(val1), (LukipFloat)(val2), (precision) \
+    )
+
 #define LUKIP_CHAR_NOT_EQUAL(val1, val2) \
     verify_condition((val1) != (val2), LINE_INFO, "%c == %c.", (val1), (val2))
 
@@ -728,7 +740,10 @@
 #define LUKIP_IS_NOT_NULL(val) \
     verify_condition((val) != NULL, LINE_INFO, "%p Is not different from NULL.", (val))
 
-#define LUKIP_IS_CONDITION(val) \
-    verify_condition((val) == true, LINE_INFO, "Condition failed.")
+#define LUKIP_IS_CONDITION(condition) \
+    verify_condition((condition) == true, LINE_INFO, "Condition failed.")
+
+#define LUKIP_CUSTOM(condition, format, ...) \
+    verify_condition((condition) == true, LINE_INFO, format, __VA_ARGS__)
 
 #endif

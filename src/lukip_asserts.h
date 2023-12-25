@@ -12,12 +12,14 @@
 
 #include "lukip.h"
 
-// format specifiers for LukipInt and LukipUnsigned.
+// format specifiers for Lukip numbers.
 #define LUKIP_INT_FMT "%" PRId64
 #define LUKIP_UINT_FMT "%" PRIu64
+#define LUKIP_FLOAT_FMT "%lf"
 
 typedef int64_t LukipInt;
 typedef uint64_t LukipUnsigned;
+typedef double LukipFloat;
 
 typedef void (*EmptyFunc)();
 
@@ -26,6 +28,7 @@ typedef enum {
     ASSERT_NOT_EQUAL
 } AssertOp;
 
+// TODO: place some of these inside lukip_asserts.c?
 typedef enum {
     UNKNOWN,
     SUCCESS,
@@ -82,11 +85,15 @@ void make_tear_down(const EmptyFunc newTearDown);
 
 void test_func(const EmptyFunc funcToTest, LineInfo caller);
 
+void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...);
+void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...);
+void verify_strings(char *string1, char *string2, LineInfo lineInfo, AssertOp op);
 void verify_bytes_array(
     void *array1, void *array2, const int length, LineInfo lineInfo, AssertOp op
 );
-void verify_strings(char *string1, char *string2, LineInfo lineInfo, AssertOp op);
-void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...);
-void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...);
+void verify_precision(
+    LukipFloat float1, LukipFloat float2, const int digitPrecision,
+    LineInfo lineInfo, AssertOp op, const char *format, ...
+);
 
 #endif

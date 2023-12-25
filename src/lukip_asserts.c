@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
@@ -7,6 +8,8 @@
 
 #define GROW_CAPACITY(capacity) ((capacity) < 16 ? 16 : (capacity) * 2)
 #define BUFFER_LENGTH 256
+
+// TODO: ensure static and const correctness
 
 typedef struct {
     int capacity;
@@ -222,6 +225,27 @@ void make_tear_down(const EmptyFunc newTearDown) {
     lukip.tearDown = newTearDown;
 }
 
+static void variadic_verify_condition(
+    bool condition, LineInfo lineInfo, const char *format, va_list *args
+) {
+    TestInfo testInfo = {
+        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
+    };
+    if (condition) {
+        assert_success(testInfo);
+        return;
+    }
+    char *message = vstrf_alloc(format, args);
+    assert_failure(testInfo, lineInfo.line, message);
+}
+
+void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    variadic_verify_condition(condition, lineInfo, format, &args);
+    va_end(args);
+}
+
 static void vbin_str_sprintf(MessageBuffer *message, const char *format, va_list *args) {
     int idx = 0;
     while (format[idx] != '\0') {
@@ -292,6 +316,56 @@ void verify_binary(bool condition, LineInfo lineInfo, const char *format, ...) {
     va_end(args);
 }
 
+static void assert_strings_equal(
+    char *string1, char *string2, TestInfo info, const int line
+) {
+    size_t length1 = strlen(string1);
+    size_t length2 = strlen(string2);
+    if (length1 != length2) {
+        char *message = strf_alloc(
+            "Different lengths: %zu != %zu. (Expected same strings).", length1, length2
+        );
+        assert_failure(info, line, message);
+        return;
+    }
+    if (strncmp(string1, string2, length1) != 0) {
+        char *message = strf_alloc(
+            "%s != %s. (Expected same strings).", string1, string2
+        );
+        assert_failure(info, line, message);
+        return;
+    }
+    assert_success(info);
+}
+
+static void assert_strings_not_equal(
+    char *string1, char *string2, TestInfo info, const int line
+) {
+    if (strlen(string1) != strlen(string2)) {
+        assert_success(info);
+        return;
+    }
+    if (strncmp(string1, string2, strlen(string1)) == 0) {
+        char *message = strf_alloc(
+            "%s == %s. (Expected different strings).", string1, string2
+        );
+        assert_failure(info, line, message);
+        return;
+    }
+    assert_success(info);
+}
+
+void verify_strings(char *string1, char *string2, LineInfo lineInfo, AssertOp op) {
+    TestInfo testInfo = {
+        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
+    };
+    if (op == ASSERT_EQUAL) {
+        assert_strings_equal(string1, string2, testInfo, lineInfo.line);
+    } else if (op == ASSERT_NOT_EQUAL) {
+        assert_strings_not_equal(string1, string2, testInfo, lineInfo.line);
+    }
+}
+
 static void assert_bytes_not_equal(
     void *array1, void *array2, const int length, TestInfo info, const int line
 ) {
@@ -343,67 +417,28 @@ void verify_bytes_array(
     }
 }
 
-static void assert_strings_equal(
-    char *string1, char *string2, TestInfo info, const int line
+void verify_precision(
+    LukipFloat float1, LukipFloat float2, const int digitPrecision,
+    LineInfo lineInfo, AssertOp op, const char *format, ...
 ) {
-    size_t length1 = strlen(string1);
-    size_t length2 = strlen(string2);
-    if (length1 != length2) {
-        char *message = strf_alloc(
-            "Different lengths: %zu != %zu. (Expected same strings).", length1, length2
-        );
-        assert_failure(info, line, message);
-        return;
-    }
-    if (strncmp(string1, string2, length1) != 0) {
-        char *message = strf_alloc(
-            "%s != %s. (Expected same strings).", string1, string2
-        );
-        assert_failure(info, line, message);
-        return;
-    }
-    assert_success(info);
-}
+    double acceptableDifference = 0.1;
+    double realDifference = float1 - float2;
 
-static void assert_strings_not_equal(
-    char *string1, char *string2, TestInfo info, const int line
-) {
-    if (strlen(string1) != strlen(string2)) {
-        assert_success(info);
-        return;
+    // manual fabs() and pow() so we don't have to link -lm just for 2 simple calls.
+    if (realDifference < 0) {
+        realDifference = -realDifference;
     }
-    if (strncmp(string1, string2, strlen(string1)) == 0) {
-        char *message = strf_alloc(
-            "%s == %s. (Expected different strings).", string1, string2
-        );
-        assert_failure(info, line, message);
-        return;
+    for (int i = 0; i < digitPrecision - 1; i++) {
+        acceptableDifference *= 0.1;
     }
-    assert_success(info);
-}
-
-void verify_strings(char *string1, char *string2, LineInfo lineInfo, AssertOp op) {
-    TestInfo testInfo = {
-        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
-    };
-    if (op == ASSERT_EQUAL) {
-        assert_strings_equal(string1, string2, testInfo, lineInfo.line);
-    } else if (op == ASSERT_NOT_EQUAL) {
-        assert_strings_not_equal(string1, string2, testInfo, lineInfo.line);
-    }
-}
-
-void verify_condition(bool condition, LineInfo lineInfo, const char *format, ...) {
-    TestInfo testInfo = {
-        .fileName=lineInfo.fileName, .funcName=lineInfo.funcName, .status=UNKNOWN
-    };
-    if (condition) {
-        assert_success(testInfo);
-        return;
-    }
+    bool withinPrecision = realDifference <= acceptableDifference ? true : false;
     va_list args;
     va_start(args, format);
-    char *message = vstrf_alloc(format, &args);
-    assert_failure(testInfo, lineInfo.line, message);
+
+    if (op == ASSERT_EQUAL) {
+        variadic_verify_condition(withinPrecision, lineInfo, format, &args);
+    } else if (op == ASSERT_NOT_EQUAL) {
+        variadic_verify_condition(!withinPrecision, lineInfo, format, &args);
+    }
     va_end(args);
 }
