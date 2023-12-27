@@ -1,21 +1,60 @@
 #ifndef LUKIP_H
 #define LUKIP_H
 
+/**
+ * @file lukip.h
+ * 
+ * @brief Header for the Lukip unit testing framework for users.
+ * 
+ * @author Larmix
+ */
+
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "../src/lukip_asserts.h"
 
+// ================================= GENERAL ===================================
+
+/** Must be called first before other Lukip macros. */
 #define LUKIP_INIT() init_lukip()
+
+/** Must be called before terminating Lukip to see the results. */
 #define LUKIP_END() end_lukip()
 
+/**
+ * @brief Makes a new set up.
+ * 
+ * The passed set up gets called before every test function is called.
+ * 
+ * @param setUpFunc The function to be called before every test.
+ */
 #define MAKE_SET_UP(setUpFunc) make_set_up(setUpFunc)
+
+/**
+ * @brief Makes a new tear down.
+ * 
+ * The passed tear down gets called after every test function has executed.
+ * 
+ * @param tearDownFunc The function to be called after every test.
+ */
 #define MAKE_TEAR_DOWN(tearDownFunc) make_tear_down(tearDownFunc)
+
+/** Makes both a new set up and tear down at once. */
 #define MAKE_TEST_SUITE(setUpFunc, tearDownFunc) \
     make_test_suite(setUpFunc, tearDownFunc)
 
-#define TEST(FuncToTest) test_func(FuncToTest, LINE_INFO)
+/**
+ * @brief Tests the passed function
+ * 
+ * @param funcToTest The function to unit-test.
+ * 
+ * @note The passed function should have no parameters or return value.
+ */
+#define TEST(funcToTest) test_func(funcToTest, LINE_INFO)
+
+// ============================== NUMBER EQUAL ================================
 
 #define LUKIP_INT_EQUAL(val1, val2) \
     verify_condition((val1) == (val2), LINE_INFO, "%d Does not equal %d.", (val1), (val2))
@@ -96,16 +135,18 @@
 #define LUKIP_BINARY_EQUAL(val1, val2) \
     verify_binary( \
         (val1) == (val2), LINE_INFO, \
-        "%s Does not equal %s. (" LUKIP_INT_FMT " Does not equal " LUKIP_INT_FMT ").", \
+        "%b Does not equal %b. (" LUKIP_INT_FMT " Does not equal " LUKIP_INT_FMT ").", \
          (val1), (val2), (LukipInt)(val1), (LukipInt)(val2) \
     )
 
 #define LUKIP_UBINARY_EQUAL(val1, val2) \
     verify_binary( \
         (val1) == (val2), LINE_INFO, \
-        "%s Does not equal %s. (" LUKIP_UINT_FMT " Does not equal " LUKIP_UINT_FMT ").", \
+        "%b Does not equal %b. (" LUKIP_UINT_FMT " Does not equal " LUKIP_UINT_FMT ").", \
          (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     )
+
+// ============================ NUMBER GREATER ================================
 
 #define LUKIP_INT_GREATER(val1, val2) \
     verify_condition( \
@@ -209,7 +250,7 @@
 #define LUKIP_BINARY_GREATER(val1, val2) \
     verify_binary( \
         (val1) > (val2), LINE_INFO, \
-        "%s Is not greater than %s. (" \
+        "%b Is not greater than %b. (" \
         LUKIP_INT_FMT " Is not greater than " LUKIP_INT_FMT ").", \
          (val1), (val2), (LukipInt)(val1), (LukipInt)(val2) \
     )
@@ -217,10 +258,12 @@
 #define LUKIP_UBINARY_GREATER(val1, val2) \
     verify_binary( \
         (val1) > (val2), LINE_INFO, \
-        "%s Is not greater than %s. (" \
+        "%b Is not greater than %b. (" \
         LUKIP_UINT_FMT " Is not greater than " LUKIP_UINT_FMT ").", \
          (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     )
+
+// ======================== NUMBER GREATER OR EQUAL ===========================
 
 #define LUKIP_INT_GREATER_EQUAL(val1, val2) \
     verify_condition( \
@@ -330,7 +373,7 @@
 #define LUKIP_BINARY_GREATER_EQUAL(val1, val2) \
     verify_binary( \
         (val1) >= (val2), LINE_INFO, \
-        "%s Is not greater or equal to %s. (" \
+        "%b Is not greater or equal to %b. (" \
         LUKIP_INT_FMT " Is not greater or equal to " LUKIP_INT_FMT ").", \
          (val1), (val2), (LukipInt)(val1), (LukipInt)(val2) \
     )
@@ -338,10 +381,12 @@
 #define LUKIP_UBINARY_GREATER_EQUAL(val1, val2) \
     verify_binary( \
         (val1) >= (val2), LINE_INFO, \
-        "%s Is not greater or equal to %s. (" \
+        "%b Is not greater or equal to %b. (" \
         LUKIP_UINT_FMT " Is not greater or equal to " LUKIP_UINT_FMT ").", \
          (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     )
+
+// ============================= NUMBER LESS ==================================
 
 #define LUKIP_INT_LESS(val1, val2) \
     verify_condition((val1) < (val2), LINE_INFO, "%d Is not less than %d.", (val1), (val2))
@@ -423,7 +468,7 @@
 #define LUKIP_BINARY_LESS(val1, val2) \
     verify_binary( \
         (val1) < (val2), LINE_INFO, \
-        "%s Is not less than %s. (" \
+        "%b Is not less than %b. (" \
         LUKIP_INT_FMT " Is not less than " LUKIP_INT_FMT ").", \
          (val1), (val2), (LukipInt)(val1), (LukipInt)(val2) \
     )
@@ -431,7 +476,7 @@
 #define LUKIP_UBINARY_LESS(val1, val2) \
     verify_binary( \
         (val1) < (val2), LINE_INFO, \
-        "%s Is not less than %s. (" \
+        "%b Is not less than %b. (" \
         LUKIP_UINT_FMT " Is not less than " LUKIP_UINT_FMT ").", \
          (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     )
@@ -540,7 +585,7 @@
 #define LUKIP_BINARY_LESS_EQUAL(val1, val2) \
     verify_binary( \
         (val1) <= (val2), LINE_INFO, \
-        "%s Is not less or equal to %s. (" \
+        "%b Is not less or equal to %b. (" \
         LUKIP_INT_FMT " Is not less or equal to " LUKIP_INT_FMT ").", \
         (val1), (val2), (LukipInt)(val1), (LukipInt)(val2) \
     )
@@ -548,10 +593,12 @@
 #define LUKIP_UBINARY_LESS_EQUAL(val1, val2) \
     verify_binary( \
         (val1) <= (val2), LINE_INFO, \
-        "%s Is not less or equal to %s. (" \
+        "%b Is not less or equal to %b. (" \
         LUKIP_UINT_FMT " Is not less or equal to " LUKIP_UINT_FMT ").", \
         (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     )
+
+// ========================== NUMBER NOT EQUAL =============================
 
 #define LUKIP_INT_NOT_EQUAL(val1, val2) \
     verify_condition( \
@@ -668,7 +715,8 @@
         (val1) != (val2), LINE_INFO, "%f Is not different from %f.", (val1), (val2) \
     )
 
-// Things that don't have comparisons (only equal and not equal).
+// ===================== TRUE (things without comparisons) =====================
+
 #define LUKIP_EQUAL_WITHIN(val1, val2, precision) \
     verify_precision( \
         val1, val2, precision, LINE_INFO, ASSERT_EQUAL, \
@@ -705,6 +753,8 @@
 #define LUKIP_IS_NULL(val) \
     verify_condition((val) == NULL, LINE_INFO, "%p Does not equal NULL.", (val))
 
+// ===================== FALSE (things without comparisons) =====================
+
 #define LUKIP_NOT_EQUAL_WITHIN(val1, val2, precision) \
     verify_precision( \
         val1, val2, precision, LINE_INFO, ASSERT_NOT_EQUAL, \
@@ -736,6 +786,8 @@
 
 #define LUKIP_IS_NOT_NULL(val) \
     verify_condition((val) != NULL, LINE_INFO, "%p Is not different from NULL.", (val))
+
+// =============================== SPECIAL =====================================
 
 #define LUKIP_IS_CONDITION(condition) \
     verify_condition((condition) == true, LINE_INFO, "Condition failed.")

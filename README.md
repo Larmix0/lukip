@@ -94,5 +94,4 @@ I'm personally about to start making a programming language, which will have tes
 It was also a nice learning experience.
 
 ## Known issues
-* Missing documentation (will be added soon).
 * Better and more tests.

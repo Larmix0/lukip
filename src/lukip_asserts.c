@@ -1,3 +1,11 @@
+/**
+ * @file lukip_asserts.c
+ * 
+ * @brief Implementation of Lukip asserts.
+ * 
+ * @author Larmix
+ */
+
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
@@ -6,24 +14,30 @@
 #include "lukip_asserts.h"
 #include "lukip_output.h"
 
+/** Increase the capacity of a dynamically growable array. */
 #define GROW_CAPACITY(capacity) ((capacity) < 16 ? 16 : (capacity) * 2)
+
+/** Length of our temporary, global buffer. */
 #define BUFFER_LENGTH 256
 
+/** Dynamically growable string. */
 typedef struct {
     int capacity;
     int length;
     char *buffer;
 } DynamicMessage;
 
-static char buffer[BUFFER_LENGTH];
-static LukipUnit lukip;
+static char buffer[BUFFER_LENGTH]; /** Temporary buffer. */
+static LukipUnit lukip; /** The unit which stores the unit-test's info. */
 
+/** frees all failure messages of a test function which had failures. */
 static void free_failure_messages(TestFunc *failedFunc) {
     for (int i = 0; i < failedFunc->failsLength; i++) {
         free(failedFunc->failures[i].message);
     }
 }
 
+/** Initializes the Lukip unit to start the program. */
 void init_lukip() {
     lukip.testsCapacity = 0;
     lukip.testsLength = 0;
@@ -35,6 +49,7 @@ void init_lukip() {
     lukip.successful = true;
 }
 
+/** Ends the Lukip unit, which is by displaying the results and freeing resources. */
 void end_lukip() {
     show_results(&lukip);
     for (int i = 0; i < lukip.testsLength; i++) {
@@ -46,32 +61,44 @@ void end_lukip() {
     free(lukip.tests);
 }
 
-static void init_test_info(FuncInfo *info) {
+/** Initializes a FuncInfo struct. */
+static void init_func_info(FuncInfo *info) {
     info->status = UNKNOWN;
     info->fileName = NULL;
     info->funcName = NULL;
 }
 
+/** Initializes a line info struct. */
 static void init_line_info(LineInfo *info) {
     info->line = 0;
-    init_test_info(&info->testInfo);
+    init_func_info(&info->testInfo);
 }
 
+/** Initializes a function which has tests. */
 static void init_test(TestFunc *test) {
     test->failsCapacity = 0;
     test->failsLength = 0;
     test->failures = NULL;
     test->testFunc = NULL;
-    init_test_info(&test->info);
+    init_func_info(&test->info);
     init_line_info(&test->caller);
 }
 
+/** Initializes a DynamicMessage which is a heap growable string. */
 static void init_dynamic_message(DynamicMessage *message) {
     message->length = 0;
     message->capacity = 0;
     message->buffer = NULL;
 }
 
+/**
+ * @brief Allocates from the heap and checks for NULL itself. 
+ * 
+ * @param size The amount of elements to be allocated.
+ * @param elementSize The size of each element.
+ * 
+ * @return Allocated pointer.
+ */
 static void *allocate(const int size, const size_t elementSize) {
     void *result = malloc(size * elementSize);
     if (result == NULL) {
@@ -80,6 +107,15 @@ static void *allocate(const int size, const size_t elementSize) {
     return result;
 }
 
+/**
+ * @brief Reallocates a certain heap pointer and checks for NULL itself.
+ * 
+ * @param pointer The pointer to be reallocated.
+ * @param newSize The new amount of elements it should be able to hold.
+ * @param elementSize The size of each element it holds.
+ * 
+ * @return The new reallocated pointer.
+ */
 static void *reallocate(void *pointer, const int newSize, const size_t elementSize) {
     void *result = realloc(pointer, newSize * elementSize);
     if (result == NULL) {
@@ -88,6 +124,14 @@ static void *reallocate(void *pointer, const int newSize, const size_t elementSi
     return result;
 }
 
+/**
+ * @brief Allocates a formatted string from a va_list.
+ * 
+ * @param format The formatted string to be allocated.
+ * @param args The va_list of arguments for the format.
+ * 
+ * @return The allocated string.
+ */
 static char *vstrf_alloc(const char *format, va_list *args) {
     vsnprintf(buffer, BUFFER_LENGTH, format, *args);
     const size_t length = strlen(buffer) + 1; // account for NUL.
@@ -96,6 +140,7 @@ static char *vstrf_alloc(const char *format, va_list *args) {
     return message;
 }
 
+/** Manually create a va_list to call the already made vstrf_alloc. */
 char *strf_alloc(const char *format, ...) {
     va_list args;
     va_start(args, format);
@@ -104,6 +149,12 @@ char *strf_alloc(const char *format, ...) {
     return message;
 }
 
+/**
+ * @brief Appends a string to a DynamicMessage.
+ * 
+ * @param message The DynamicMessage to append to.
+ * @param string The string to append to message.
+ */
 static void append_message_string(DynamicMessage *message, const char *string) {
     const int srcLength = strlen(string);
 
@@ -116,6 +167,7 @@ static void append_message_string(DynamicMessage *message, const char *string) {
     message->length += srcLength;
 }
 
+/** Reverses a string in place. */
 static void reverse_string(char *string) {
     const int length = strlen(string);
     char tmp;
@@ -126,19 +178,27 @@ static void reverse_string(char *string) {
     }
 }
 
+/**
+ * @brief Pastes an int on a string as a binary number.
+ * 
+ * Iterates over the LukipInt and grabs its bits right to left,
+ * and ads a padding space every byte for readability as well as
+ * padding the last byte with zeroes so all bytes are 8 zeroes.
+ * 
+ * @param[out] string The string which stores the binary output.
+ * @param[in] value The LukipInt to extract the binary from.
+ */
 static void sprint_int_as_bin(char *string, LukipInt value) {
     const int byte_size = 8;
     int bitsCopied = 0, length = 0;
 
     while (value != 0) {
-        // add white space every byte
         if (bitsCopied % byte_size == 0 && bitsCopied != 0) {
             string[length++] = ' ';
         }
-        // add bit from the very right
         string[length++] = value & 1 ? '1' : '0';
         bitsCopied++;
-        value >>= 1; // read next bit
+        value >>= 1;
     }
     // pad remaining bits
     while (bitsCopied % byte_size != 0) {
@@ -150,6 +210,7 @@ static void sprint_int_as_bin(char *string, LukipInt value) {
     reverse_string(string);
 }
 
+/** Appends a testing function to Lukip */
 static void append_test(const TestFunc newTest) {
     if (lukip.testsCapacity < lukip.testsLength + 1) {
         lukip.testsCapacity = GROW_CAPACITY(lukip.testsCapacity);
@@ -160,6 +221,10 @@ static void append_test(const TestFunc newTest) {
     lukip.tests[lukip.testsLength++] = newTest;
 }
 
+/**
+ * Calls a testing function (so its macros can be used),
+ * then appends it. Also uses set up and tear down if they're set.
+ */
 void test_func(const EmptyFunc funcToTest, const LineInfo caller) {
     if (lukip.setUp != NULL) {
         lukip.setUp();
@@ -175,6 +240,7 @@ void test_func(const EmptyFunc funcToTest, const LineInfo caller) {
     }
 }
 
+/** Append a failure to the failure array of the function we're currently testing. */
 static void append_failure(Failure failure) {
     TestFunc *testFunc = &lukip.tests[lukip.testsLength - 1];
 
@@ -187,6 +253,7 @@ static void append_failure(Failure failure) {
     testFunc->failures[testFunc->failsLength++] = failure;
 }
 
+/** An assert was successful, sets information to success if it hasn't already failed. */
 static void assert_success(const FuncInfo newInfo) {
     FuncInfo *info = &lukip.tests[lukip.testsLength - 1].info;
     if (info->status == UNKNOWN) {
@@ -196,6 +263,7 @@ static void assert_success(const FuncInfo newInfo) {
     }
 }
 
+/** An assert was failed, sets the function's status to fail and appends the failed assert. */
 static void assert_failure(const LineInfo newInfo, char *message) {
     FuncInfo *info = &lukip.tests[lukip.testsLength - 1].info;
     if (info->status == UNKNOWN) {
@@ -208,19 +276,30 @@ static void assert_failure(const LineInfo newInfo, char *message) {
     append_failure(failure);
 }
 
+/** Sets both the new set up and tear down to be called between each test. */
 void make_test_suite(const EmptyFunc newSetUp, const EmptyFunc newTearDown) {
     lukip.setUp = newSetUp;
     lukip.tearDown = newTearDown;
 }
 
+/** Makes a new set up to be called between each test. */
 void make_set_up(const EmptyFunc newSetUp) {
     lukip.setUp = newSetUp;
 }
 
+/** Makes a new tear down to be called between each test. */
 void make_tear_down(const EmptyFunc newTearDown) {
     lukip.tearDown = newTearDown;
 }
 
+/**
+ * @brief Asserts depending on a condition with the error message format as va_list.
+ * 
+ * @param condition Condition to assert depending on.
+ * @param info Line information of the assert.
+ * @param format The formatted error message.
+ * @param args Arguments for format.
+ */
 static void variadic_verify_condition(
     const bool condition, const LineInfo info, const char *format, va_list *args
 ) {
@@ -232,6 +311,7 @@ static void variadic_verify_condition(
     assert_failure(info, message);
 }
 
+/** Initiates a va_list and just calls variadic_verify_condition. */
 void verify_condition(const bool condition, const LineInfo info, const char *format, ...) {
     va_list args;
     va_start(args, format);
@@ -239,6 +319,7 @@ void verify_condition(const bool condition, const LineInfo info, const char *for
     va_end(args);
 }
 
+/** Appends a single character to a DynamicMessage. */
 static void append_message_char(DynamicMessage *message, char ch) {
     // + 2 to always have space for NUL.
     if (message->length + 2 >= message->capacity) {
@@ -250,6 +331,13 @@ static void append_message_char(DynamicMessage *message, char ch) {
     message->buffer[message->length++] = ch;
 }
 
+/**
+ * @brief vsprintf(), but on a DynamicMessage and it allows %b binary format.
+ * 
+ * @param[out] message The message to be appended the formatted string.
+ * @param[in] format The formatted message.
+ * @param[in] args Arguments for the format.
+ */
 static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_list *args) {
     int idx = 0;
     while (format[idx] != '\0') {
@@ -283,7 +371,7 @@ static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_lis
             snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_FMT, va_arg(*args, LukipUnsigned));
             append_message_string(message, buffer);
             break;
-        case 's':
+        case 'b':
             idx++;
             sprint_int_as_bin(buffer, va_arg(*args, LukipInt));
             append_message_string(message, buffer);
@@ -293,6 +381,10 @@ static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_lis
     message->buffer[message->length] = '\0';
 }
 
+/** 
+ * Tries to verify the binary condition, upon failure it creates a DynamicMessage
+ * to put the formatted error inside and asserts failure.
+ */
 void verify_binary(const bool condition, const LineInfo info, const char *format, ...) {
     if (condition) {
         assert_success(info.testInfo);
@@ -308,6 +400,16 @@ void verify_binary(const bool condition, const LineInfo info, const char *format
     va_end(args);
 }
 
+/**
+ * @brief Asserts that 2 strings have the same characters and length.
+ * 
+ * It tries to ensure that they have the same length first.
+ * If it succeeded, then it strncmp's them. Both checks have different error messages. 
+ * 
+ * @param string1 The first string.
+ * @param string2 The second string.
+ * @param info The line information of the assert.
+ */
 static void assert_strings_equal(
     const char *string1, const char *string2, const LineInfo info
 ) {
@@ -330,6 +432,13 @@ static void assert_strings_equal(
     assert_success(info.testInfo);
 }
 
+/**
+ * @brief Asserts that 2 strings aren't equal.
+ * 
+ * @param string1 The first string.
+ * @param string2 The second string.
+ * @param info The line information of the assert.
+ */
 static void assert_strings_not_equal(
     const char *string1, const char *string2, const LineInfo info
 ) {
@@ -347,6 +456,7 @@ static void assert_strings_not_equal(
     assert_success(info.testInfo);
 }
 
+/** Calls a string operation function based off of op for assertion. */
 void verify_strings(
     const char *string1, const char *string2, const LineInfo info, const AssertOp op
 ) {
@@ -357,6 +467,14 @@ void verify_strings(
     }
 }
 
+/**
+ * @brief Asserts that 2 byte arrays are not equal.
+ * 
+ * @param array1 The first byte array.
+ * @param array2 The second byte array.
+ * @param length The amount of bytes to be compared.
+ * @param info The line information of the assert.
+ */
 static void assert_bytes_not_equal(
     const void *array1, const void *array2, const int length, const LineInfo info
 ) {
@@ -375,6 +493,14 @@ static void assert_bytes_not_equal(
     assert_failure(info, message);
 }
 
+/**
+ * @brief Asserts that 2 byte arrays are equal.
+ * 
+ * @param array1 The first byte array.
+ * @param array2 The second byte array.
+ * @param length The amount of bytes to be compared.
+ * @param info The line information of the assert.
+ */
 static void assert_bytes_equal(
     const void *array1, const void *array2, const int length, const LineInfo info
 ) {
@@ -395,6 +521,7 @@ static void assert_bytes_equal(
     assert_success(info.testInfo);
 }
 
+/** Calls a byte array operation function based off of op for assertion. */
 void verify_bytes_array(
     const void *array1, const void *array2, const int length,
     const LineInfo info, const AssertOp op
@@ -406,14 +533,17 @@ void verify_bytes_array(
     }
 }
 
+/**
+ * We decrase the acceptableDifference by an extra place for every extra number of
+ * digitPrecision passed. We also ensure that the real difference of
+ * the passed floats is positive before checking if they're WithinPrecision.
+ */
 void verify_precision(
     const LukipFloat float1, const LukipFloat float2, const int digitPrecision,
     const LineInfo info, const AssertOp op, const char *format, ...
 ) {
     double acceptableDifference = 0.1;
     double realDifference = float1 - float2;
-
-    // manual fabs() and pow() so we don't have to link -lm just for 2 simple calls.
     if (realDifference < 0) {
         realDifference = -realDifference;
     }

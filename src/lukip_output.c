@@ -1,14 +1,29 @@
+/**
+ * @file lukip_output.c
+ * 
+ * @brief Outputs to the terminal the results of a Lukip unit-testing program.
+ * 
+ * @author Larmix
+ */
+
 #include <stdio.h>
 
 #include "lukip_asserts.h"
 
-#define LONG_LINE_LENGTH 100
+#define LONG_LINE_LENGTH 100 /** Amount of characters placed to separate output. */
 
-#define DEFAULT "\033[0m"
+#define DEFAULT "\033[0m" /** Resets color to normal. */
+
 #define RED "\033[1;31m"
 #define GREEN "\033[1;32m"
 #define YELLOW "\033[1;33m"
 
+
+/**
+ * @brief Prints a certain character a lot of times, acting as a long line.
+ * 
+ * @param lineChar The character to print the long line with.
+ */
 static void long_line(const char lineChar) {
     for (int i = 0; i < LONG_LINE_LENGTH; i++) {
         putchar(lineChar);
@@ -16,6 +31,17 @@ static void long_line(const char lineChar) {
     putchar('\n');
 }
 
+/**
+ * @brief Prints a certain character a lot of times with a message in the middle.
+ * 
+ * Prints a certain character half of the normal length of a "long line" subtracted by
+ * half of the length of the message on both sides. Then shows the message
+ * followed by the same amount of the long line character half.
+ * 
+ * @param lineChar The character to put left and right of the message.
+ * @param message The message in the middle.
+ * @param mode The mode (usually a specific color) to print the message with.
+ */
 static void long_line_message(char lineChar, char *message, char *mode) {
     // -2 to account for bracket and space
     const int halfLineLength = (LONG_LINE_LENGTH / 2) - 2 - (strlen(message) / 2);
@@ -29,6 +55,11 @@ static void long_line_message(char lineChar, char *message, char *mode) {
     putchar('\n');
 }
 
+/**
+ * @brief Show a warning message for every function with unknown status (had no asserts).
+ * 
+ * @param lukip The Lukip unit to show the warnings of.
+ */
 static void show_warnings(const LukipUnit *lukip) {
     bool hadWarnings = false;
     for (int i = 0; i < lukip->testsLength; i++) {
@@ -48,6 +79,11 @@ static void show_warnings(const LukipUnit *lukip) {
     }
 }
 
+/**
+ * @brief Show an error message for each unit-test failure.
+ * 
+ * @param lukip The Lukip unit to show the errors of.
+ */
 static void errors_info(const LukipUnit *lukip) {
     for (int i = 0; i < lukip->testsLength; i++) {
         const TestFunc *test = &lukip->tests[i];
@@ -67,6 +103,15 @@ static void errors_info(const LukipUnit *lukip) {
     }
 }
 
+/**
+ * @brief Display the results of a failed Lukip unit.
+ * 
+ * Show F, dot or a question mark for each tests depending on the status,
+ * then display the error messages, and a summary.
+ * 
+ * @param lukip The failed Lukip unit to display the results of.
+ * @param executionTime The time it took the program to execute.
+ */
 static void show_fail(const LukipUnit *lukip, const double executionTime) {
     int failures = 0;
     for (int i = 0; i < lukip->testsLength; i++) {
@@ -91,6 +136,16 @@ static void show_fail(const LukipUnit *lukip, const double executionTime) {
     free(failMessage);
 }
 
+/**
+ * @brief Display results of a successful Lukip unit.
+ * 
+ * Show a dot for tests with successful asserts and a question mark
+ * for unknown test results that will show a warning.
+ * Then show how many tests were ran, and a summary.
+ * 
+ * @param lukip The successful Lukip unit to show the results of.
+ * @param executionTime The time it took the program to execute.
+ */
 static void show_success(const LukipUnit *lukip, const double executionTime) {
     for (int i = 0; i < lukip->testsLength; i++) {
         lukip->tests[i].info.status == SUCCESS ? putchar('.') : putchar('?');
@@ -109,6 +164,10 @@ static void show_success(const LukipUnit *lukip, const double executionTime) {
     free(successMessage);
 }
 
+/**
+ * Print some newlines, and a long line of dashes to seperate results from
+ * the rest of the terminal. Show warnings and then the results after.
+ */
 void show_results(const LukipUnit *lukip) {
     printf("\n\n\n");
     long_line('-');
