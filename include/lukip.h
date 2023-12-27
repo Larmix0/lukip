@@ -718,11 +718,7 @@
 // ===================== TRUE (things without comparisons) =====================
 
 #define LUKIP_EQUAL_WITHIN(val1, val2, precision) \
-    verify_precision( \
-        val1, val2, precision, LINE_INFO, ASSERT_EQUAL, \
-        LUKIP_FLOAT_FMT " Does not equal " LUKIP_FLOAT_FMT " within %d places.", \
-        (LukipFloat)(val1), (LukipFloat)(val2), (precision), ASSERT_EQUAL \
-    )
+    verify_precision(val1, val2, precision, LINE_INFO, ASSERT_EQUAL)
 
 #define LUKIP_CHAR_EQUAL(val1, val2) \
     verify_condition((val1) == (val2), LINE_INFO, "%c Does not equal %c.", (val1), (val2))
@@ -756,11 +752,7 @@
 // ===================== FALSE (things without comparisons) =====================
 
 #define LUKIP_NOT_EQUAL_WITHIN(val1, val2, precision) \
-    verify_precision( \
-        val1, val2, precision, LINE_INFO, ASSERT_NOT_EQUAL, \
-        LUKIP_FLOAT_FMT " Is not different from " LUKIP_FLOAT_FMT " within %d places.", \
-        (LukipFloat)(val1), (LukipFloat)(val2), (precision) \
-    )
+    verify_precision(val1, val2, precision, LINE_INFO, ASSERT_NOT_EQUAL)
 
 #define LUKIP_CHAR_NOT_EQUAL(val1, val2) \
     verify_condition((val1) != (val2), LINE_INFO, "%c == %c.", (val1), (val2))

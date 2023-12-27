@@ -195,12 +195,10 @@ void verify_bytes_array(
  * @param digitPrecision Precision in floating places.
  * @param info The line information of the assert.
  * @param op The operation to be done on the floats
- * @param format The formatted error message in the case of failing.
- * @param ... Arguments for the format.
  */
 void verify_precision(
     const LukipFloat float1, const LukipFloat float2, const int digitPrecision,
-    const LineInfo info, const AssertOp op, const char *format, ...
+    const LineInfo info, const AssertOp op
 );
 
 #endif

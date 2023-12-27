@@ -253,7 +253,7 @@ static void append_failure(Failure failure) {
     testFunc->failures[testFunc->failsLength++] = failure;
 }
 
-/** An assert was successful, sets information to success if it hasn't already failed. */
+/** Sets information to success if it hasn't already failed or succeeded. */
 static void assert_success(const FuncInfo newInfo) {
     FuncInfo *info = &lukip.tests[lukip.testsLength - 1].info;
     if (info->status == UNKNOWN) {
@@ -263,7 +263,7 @@ static void assert_success(const FuncInfo newInfo) {
     }
 }
 
-/** An assert was failed, sets the function's status to fail and appends the failed assert. */
+/** Sets the function's status to fail and appends the failed assert. */
 static void assert_failure(const LineInfo newInfo, char *message) {
     FuncInfo *info = &lukip.tests[lukip.testsLength - 1].info;
     if (info->status == UNKNOWN) {
@@ -292,30 +292,19 @@ void make_tear_down(const EmptyFunc newTearDown) {
     lukip.tearDown = newTearDown;
 }
 
-/**
- * @brief Asserts depending on a condition with the error message format as va_list.
- * 
- * @param condition Condition to assert depending on.
- * @param info Line information of the assert.
- * @param format The formatted error message.
- * @param args Arguments for format.
+/** 
+ * Tries to verify the passed condition.
+ * Otherwise, it creates a va_list for the passed error message to assert failure. 
  */
-static void variadic_verify_condition(
-    const bool condition, const LineInfo info, const char *format, va_list *args
-) {
+void verify_condition(const bool condition, const LineInfo info, const char *format, ...) {
     if (condition) {
         assert_success(info.testInfo);
         return;
     }
-    char *message = vstrf_alloc(format, args);
-    assert_failure(info, message);
-}
-
-/** Initiates a va_list and just calls variadic_verify_condition. */
-void verify_condition(const bool condition, const LineInfo info, const char *format, ...) {
     va_list args;
     va_start(args, format);
-    variadic_verify_condition(condition, info, format, &args);
+    char *message = vstrf_alloc(format, &args);
+    assert_failure(info, message);
     va_end(args);
 }
 
@@ -534,13 +523,14 @@ void verify_bytes_array(
 }
 
 /**
- * We decrase the acceptableDifference by an extra place for every extra number of
- * digitPrecision passed. We also ensure that the real difference of
+ * We decrase the acceptableDifference by an extra place for every number of
+ * digitPrecision. We also ensure that the real difference of
  * the passed floats is positive before checking if they're WithinPrecision.
+ * Then, call verify_condition() depending on the operation to be done.
  */
 void verify_precision(
     const LukipFloat float1, const LukipFloat float2, const int digitPrecision,
-    const LineInfo info, const AssertOp op, const char *format, ...
+    const LineInfo info, const AssertOp op
 ) {
     double acceptableDifference = 0.1;
     double realDifference = float1 - float2;
@@ -551,13 +541,18 @@ void verify_precision(
         acceptableDifference *= 0.1;
     }
     const bool withinPrecision = realDifference <= acceptableDifference ? true : false;
-    va_list args;
-    va_start(args, format);
 
     if (op == ASSERT_EQUAL) {
-        variadic_verify_condition(withinPrecision, info, format, &args);
+        verify_condition(
+            withinPrecision, info,
+            LUKIP_FLOAT_FMT " Does not equal " LUKIP_FLOAT_FMT " within %d places.",
+            float1, float2, digitPrecision
+        );
     } else if (op == ASSERT_NOT_EQUAL) {
-        variadic_verify_condition(!withinPrecision, info, format, &args);
+        verify_condition(
+            !withinPrecision, info, 
+            LUKIP_FLOAT_FMT " Is not different from " LUKIP_FLOAT_FMT " within %d places.",
+            float1, float2, digitPrecision
+        );
     }
-    va_end(args);
 }
