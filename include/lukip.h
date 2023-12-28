@@ -739,12 +739,6 @@
 #define LUKIP_STRING_EQUAL(val1, val2) \
     verify_strings(val1, val2, LINE_INFO, ASSERT_EQUAL)
 
-#define LUKIP_IS_TRUE(val) \
-    verify_condition((val) == true, LINE_INFO, "false Does not equal true.")
-
-#define LUKIP_IS_FALSE(val) \
-    verify_condition((val) == false, LINE_INFO, "true Does not equal false.")
-
 #define LUKIP_IS_NULL(val) \
     verify_condition((val) == NULL, LINE_INFO, "%p Does not equal NULL.", (val))
 
@@ -779,6 +773,12 @@
     verify_condition((val) != NULL, LINE_INFO, "%p Is not different from NULL.", (val))
 
 // =============================== SPECIAL =====================================
+
+#define LUKIP_IS_TRUE(val) \
+    verify_condition((val) == true, LINE_INFO, "false Does not equal true.")
+
+#define LUKIP_IS_FALSE(val) \
+    verify_condition((val) == false, LINE_INFO, "true Does not equal false.")
 
 #define LUKIP_IS_CONDITION(condition) \
     verify_condition((condition) == true, LINE_INFO, "Condition failed.")

@@ -44,15 +44,15 @@ int globalNumber = 0;
 
 void set_up() {
     globalNumber += 2;
-    printf("Set Up activated with globalNumber %d!\n", globalNumber);
+    printf("Set up called, globalNumber: %d\n", globalNumber);
 }
 void tear_down() {
     globalNumber--;
-    printf("Tear Down called with globalNumber now being %d!\n", globalNumber);
+    printf("Tear down called, globalNumber: %d\n", globalNumber);
 }
 
 void empty_test() {
-    // Give us warning for having no assertions.
+    // Gives us a warning for having no assertions.
 }
 
 void failed_test() {
@@ -62,7 +62,7 @@ void failed_test() {
 }
 
 void successful_test() {
-    int8_t five = 5; // Showcases that it handles multiple types.
+    int8_t five = 5;
     LUKIP_INT_EQUAL(five, 5);
     LUKIP_INT_EQUAL(2, 2);
     LUKIP_BOOL_EQUAL(true, true);
@@ -72,7 +72,7 @@ int main() {
     LUKIP_INIT();
     MAKE_TEST_SUITE(set_up, tear_down);
 
-    TEST(failed_test); // Fails because of this call here.
+    TEST(failed_test); // Fails because of this.
     TEST(successful_test);
     TEST(empty_test);
 
@@ -86,12 +86,55 @@ int main() {
 #### If we remove/comment the third line of main `TEST(failed_test);` then the successful output looks like the following:
 ![success case](assets/success_screenshot.png)
 
+## Available assertions and their supported operations
+#### Signed numbers (==, !=, >, >=, <, <=)
+* int <br>
+* int8 <br>
+* int32 <br>
+* int64 <br>
+* long <br>
+* float <br>
+* double <br>
+* hex <br>
+* binary <br>
+
+#### Unsigned numbers (==, !=, >, >=, <, <=)
+* uint <br>
+* uint8 <br>
+* uint16 <br>
+* uint32 <br>
+* uint64 <br>
+* ulong <br>
+* uhex <br>
+* ubinary <br>
+* size_t <br>
+
+#### Equal or not (==, !=)
+* Float within precision <br>
+* Char <br>
+* Bool <br>
+* Address <br>
+* Byte array <br>
+* String <br>
+* Is NULL <br>
+
+#### Special
+* Is true <br>
+* Is false <br>
+* Is condition <br>
+* Is custom (allows a custom error message)
+
+
 ## Why I made Lukip
 For fun as well as having a small, easy-to-use unit-testing framework in C,
 instead of having to install other ones. Especially because
 I'm personally about to start making a programming language, which will have testing.
 
 It was also a nice learning experience.
+
+## Contributing
+I currently don't accept any contributions as this is a personal project.
+However, if you find any bugs then feel free to alert me by submitting an issue.
 
 ## Known issues
 * Better and more tests.
