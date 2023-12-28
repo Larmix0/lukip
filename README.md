@@ -1,8 +1,9 @@
 # Lukip
-A small unit-testing framework/library made in C by me.
+A small unit-testing framework I made in C.
 
 ## What the project's about
-It's for testing C applications with simple but convenient functions by just compiling an archive (.a) file with your other *.o test files. It also works on Linux and Windows (at least as far as my testing on my Windows 10 and Ubuntu WSL goes).
+It's for testing C applications conveniently by just compiling an archive (.a) file with your other test files.
+It also works on Linux and Windows (at least as far as my testing on my Windows 10 and Ubuntu WSL goes).
 
 ## Building
 Clone in the directory you want it on with:
@@ -110,27 +111,27 @@ int main() {
 * size_t <br>
 
 #### Equal or not (==, !=)
-* Float within precision <br>
-* Char <br>
-* Bool <br>
-* Address <br>
-* Byte array <br>
-* String <br>
-* Is NULL <br>
+* float within precision <br>
+* char <br>
+* bool <br>
+* address <br>
+* byte array <br>
+* string <br>
+* is NULL <br>
 
 #### Special
-* Is true <br>
-* Is false <br>
-* Is condition <br>
-* Is custom (allows a custom error message)
-
+* is true <br>
+* is false <br>
+* is condition <br>
+* is custom (allows a custom error message)
 
 ## Why I made Lukip
 For fun as well as having a small, easy-to-use unit-testing framework in C,
-instead of having to install other ones. Especially because
-I'm personally about to start making a programming language, which will have testing.
+instead of having to install other ones. Also because
+I'm personally about to start making a programming language,
+which I want to rely exclusively on my own code, including the testing framework.
 
-It was also a nice learning experience.
+(It was also a nice learning experience.)
 
 ## Contributing
 I currently don't accept any contributions as this is a personal project.
