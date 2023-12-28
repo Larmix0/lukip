@@ -92,7 +92,7 @@ static void errors_info(const LukipUnit *lukip) {
         for (int j = 0; j < test->failsLength; j++) {
             printf("[" RED "FAIL" DEFAULT "] ");
             printf(
-                "Line %d: %s|%s(): \"%s\"\n",
+                "Line %d: %s|%s(): %s\n",
                 test->failures[j].line,
                 test->info.fileName,
                 test->info.funcName,

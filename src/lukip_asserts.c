@@ -415,7 +415,7 @@ static void assert_strings_equal(
     }
     if (strncmp(string1, string2, length1) != 0) {
         char *message = strf_alloc(
-            "\"%s\" Does not equal \"%s.\"", string1, string2
+            "\"%s\" Does not equal \"%s\".", string1, string2
         );
         assert_failure(info, message);
         return;

@@ -55,7 +55,7 @@ void bytes_array_test() {
 }
 
 void string_test() {
-    char str1[10] = "string!9", str2[10] = "string!";
+    char str1[10] = "string1", str2[10] = "string!";
     LUKIP_STRING_EQUAL(str1, str2);
 }
 
