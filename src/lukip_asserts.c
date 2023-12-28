@@ -1,6 +1,5 @@
 /**
  * @file lukip_asserts.c
- * 
  * @brief Implementation of Lukip asserts.
  * 
  * @author Larmix
@@ -134,7 +133,7 @@ static void *reallocate(void *pointer, const int newSize, const size_t elementSi
  */
 static char *vstrf_alloc(const char *format, va_list *args) {
     vsnprintf(buffer, BUFFER_LENGTH, format, *args);
-    const size_t length = strlen(buffer) + 1; // account for NUL.
+    const size_t length = strlen(buffer) + 1; // +1 to account for NUL.
     char *message = allocate((int)length, sizeof(char));
     strncpy(message, buffer, length);
     return message;
@@ -192,6 +191,7 @@ static void sprint_int_as_bin(char *string, LukipInt value) {
     const int byte_size = 8;
     int bitsCopied = 0, length = 0;
 
+    // Copy bits from right to left.
     while (value != 0) {
         if (bitsCopied % byte_size == 0 && bitsCopied != 0) {
             string[length++] = ' ';
@@ -200,12 +200,12 @@ static void sprint_int_as_bin(char *string, LukipInt value) {
         bitsCopied++;
         value >>= 1;
     }
-    // pad remaining bits
+    // Pad remaining bits
     while (bitsCopied % byte_size != 0) {
         string[length++] = '0';
         bitsCopied++;
     }
-    // we were copying right to left, but strings go from left to right, so reverse.
+    // We were copying right to left, but strings go from left to right, so reverse.
     string[length] = '\0';
     reverse_string(string);
 }
@@ -232,9 +232,10 @@ void test_func(const EmptyFunc funcToTest, const LineInfo caller) {
     TestFunc testFunc;
     init_test(&testFunc);
     testFunc.caller = caller;
-
     append_test(testFunc);
+
     funcToTest();
+
     if (lukip.tearDown != NULL) {
         lukip.tearDown();
     }
@@ -330,6 +331,7 @@ static void append_message_char(DynamicMessage *message, char ch) {
 static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_list *args) {
     int idx = 0;
     while (format[idx] != '\0') {
+        // Not a format.
         if (format[idx] != '%') {
             append_message_char(message, format[idx++]);
             continue;
@@ -338,7 +340,7 @@ static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_lis
         switch (format[idx]) {
         case 'l':
             if (format[idx + 1] == 'l') {
-                idx++; // handle lld, lli, and llu.
+                idx++; // Handle lld, lli, and llu.
             }
             if (format[idx + 1] == 'd' || format[idx + 1] == 'i') {
                 idx += 2;
@@ -406,14 +408,14 @@ static void assert_strings_equal(
     const size_t length2 = strlen(string2);
     if (length1 != length2) {
         char *message = strf_alloc(
-            "Different lengths: %zu != %zu. (Expected same strings).", length1, length2
+            "Different string lengths: %zu Does not equal %zu.", length1, length2
         );
         assert_failure(info, message);
         return;
     }
     if (strncmp(string1, string2, length1) != 0) {
         char *message = strf_alloc(
-            "%s != %s. (Expected same strings).", string1, string2
+            "\"%s\" Does not equal \"%s.\"", string1, string2
         );
         assert_failure(info, message);
         return;
@@ -437,7 +439,7 @@ static void assert_strings_not_equal(
     }
     if (strncmp(string1, string2, strlen(string1)) == 0) {
         char *message = strf_alloc(
-            "%s == %s. (Expected different strings).", string1, string2
+            "\"%s\" Is not different from \"%s\".", string1, string2
         );
         assert_failure(info, message);
         return;
@@ -477,7 +479,7 @@ static void assert_bytes_not_equal(
         }
     }
     char *message = strf_alloc(
-        "Failed because byte arrays are equal. (Expected not equal)."
+        "Failed because byte arrays are not different."
     );
     assert_failure(info, message);
 }
@@ -501,7 +503,7 @@ static void assert_bytes_equal(
             continue;
         }
         char *message = strf_alloc(
-            "Index %i: %u != %u. (Expected equal byte arrays).",
+            "Index %i of byte arrays: %u Does not equal %u.",
             i, arr1Byte, arr2Byte
         );
         assert_failure(info, message);
@@ -534,6 +536,8 @@ void verify_precision(
 ) {
     double acceptableDifference = 0.1;
     double realDifference = float1 - float2;
+
+    // Manual fabs and pow so we don't have to link -lm just for 2 calls.
     if (realDifference < 0) {
         realDifference = -realDifference;
     }

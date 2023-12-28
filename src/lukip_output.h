@@ -3,7 +3,6 @@
 
 /**
  * @file lukip_asserts.h
- * 
  * @brief Header for displaying output of a Lukip unit-testing program.
  * 
  * @author Larmix

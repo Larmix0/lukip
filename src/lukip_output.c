@@ -1,6 +1,5 @@
 /**
  * @file lukip_output.c
- * 
  * @brief Outputs to the terminal the results of a Lukip unit-testing program.
  * 
  * @author Larmix
@@ -43,7 +42,7 @@ static void long_line(const char lineChar) {
  * @param mode The mode (usually a specific color) to print the message with.
  */
 static void long_line_message(char lineChar, char *message, char *mode) {
-    // -2 to account for bracket and space
+    // -2 to account for bracket and space.
     const int halfLineLength = (LONG_LINE_LENGTH / 2) - 2 - (strlen(message) / 2);
     for (int i = 0; i < halfLineLength; i++) {
         putchar(lineChar);
@@ -64,7 +63,7 @@ static void show_warnings(const LukipUnit *lukip) {
     bool hadWarnings = false;
     for (int i = 0; i < lukip->testsLength; i++) {
         if (lukip->tests[i].info.status != UNKNOWN) {
-            continue; // no need to warn
+            continue; // No need to warn.
         }
         hadWarnings = true;
         const LineInfo *caller = &lukip->tests[i].caller;

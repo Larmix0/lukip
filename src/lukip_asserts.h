@@ -3,7 +3,6 @@
 
 /**
  * @file lukip_asserts.h
- * 
  * @brief Header for Lukip functionality and asserts implementation.
  * 
  * @author Larmix
@@ -19,9 +18,6 @@
 #include <time.h>
 
 #include "lukip.h"
-
-// TODO: make verify_precision not take a format, but have the error message built-in instead.
-// TODO: this also means that variadic_verify_condition can be removed.
 
 /** Pastes all information before function call (file name, function name, and line.). */
 #define LINE_INFO \

@@ -3,7 +3,6 @@
 
 /**
  * @file lukip.h
- * 
  * @brief Header for the Lukip unit testing framework for users.
  * 
  * @author Larmix
