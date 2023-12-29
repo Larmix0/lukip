@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -g3 -Werror -Iinclude
+CFLAGS = -Wall -Wextra -Wpedantic -g -Werror -Iinclude
 
 SRC_DIR = src
 TEST_DIR = tests
@@ -10,7 +10,7 @@ TESTS := $(wildcard $(TEST_DIR)/*.c $(TEST_DIR)/*/*.c $(TEST_DIR)/*/*/*.c)
 
 ifeq ($(OS), Windows_NT)
 	EXE = lukip.exe
-	SRCS :=  $(subst /,\,$(SRCS))
+	SRCS := $(subst /,\,$(SRCS))
 	TESTS := $(subst /,\,$(TESTS))
 else
 	EXE = lukip
