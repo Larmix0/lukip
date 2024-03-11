@@ -41,7 +41,7 @@ clean:
 ifeq ($(OS), Windows_NT)
 	$(foreach obj, $(OBJS) $(TEST_OBJS), if exist $(obj) del /s /q $(obj) > NUL &)
 	if exist $(BIN) rmdir /s /q $(BIN)
-	if exist liblukip.a del /s /q liblukip.a
+	if exist liblukip.a del /s /q liblukip.a > NUL
 else
 	rm -rf $(OBJS) $(TEST_OBJS) $(BIN) liblukip.a
 endif
