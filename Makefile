@@ -19,6 +19,12 @@ endif
 OBJS = $(SRCS:.c=.o)
 TEST_OBJS = $(TESTS:.c=.o)
 
+# "newline" resolves to an actual escape "\n" sequence (hence endef is an extra line down).
+define newline
+
+
+endef
+
 .PHONY: all clean lib tests
 
 all: lib
@@ -39,7 +45,7 @@ $(BIN):
 
 clean:
 ifeq ($(OS), Windows_NT)
-	$(foreach obj, $(OBJS) $(TEST_OBJS), if exist $(obj) del /s /q $(obj) > NUL &)
+	$(foreach obj, $(OBJS) $(TEST_OBJS), if exist $(obj) del /s /q $(obj) > NUL$(newline))
 	if exist $(BIN) rmdir /s /q $(BIN)
 	if exist liblukip.a del /s /q liblukip.a > NUL
 else
