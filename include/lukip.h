@@ -783,7 +783,7 @@
 #define LUKIP_IS_CONDITION(condition) \
     verify_condition((condition) == true, LINE_INFO, "Condition failed.")
 
-#define LUKIP_CUSTOM(condition, format, ...) \
-    verify_condition((condition) == true, LINE_INFO, format, __VA_ARGS__)
+#define LUKIP_CUSTOM(condition, ...) \
+    verify_condition((condition) == true, LINE_INFO, __VA_ARGS__)
 
 #endif

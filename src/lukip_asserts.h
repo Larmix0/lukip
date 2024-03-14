@@ -22,8 +22,8 @@
 /** Pastes all information before function call (file name, function name, and line.). */
 #define LINE_INFO \
     (LineInfo){ \
-        (FuncInfo){.status=UNKNOWN, .fileName=__FILE__, .funcName=(char *)__func__}, \
-        .line=__LINE__, \
+        (FuncInfo){.status = UNKNOWN, .fileName = __FILE__, .funcName = (char *)__func__}, \
+        .line = __LINE__, \
     }
 
 #define LUKIP_INT_FMT "%" PRId64 /** Lukip integer format for strings. */
