@@ -720,7 +720,7 @@
     verify_precision(val1, val2, precision, LINE_INFO, ASSERT_EQUAL)
 
 #define LUKIP_CHAR_EQUAL(val1, val2) \
-    verify_condition((val1) == (val2), LINE_INFO, "%c Does not equal %c.", (val1), (val2))
+    verify_condition((val1) == (val2), LINE_INFO, "'%c' Does not equal '%c'.", (val1), (val2))
 
 #define LUKIP_BOOL_EQUAL(val1, val2) \
     verify_condition( \
@@ -748,7 +748,9 @@
     verify_precision(val1, val2, precision, LINE_INFO, ASSERT_NOT_EQUAL)
 
 #define LUKIP_CHAR_NOT_EQUAL(val1, val2) \
-    verify_condition((val1) != (val2), LINE_INFO, "%c == %c.", (val1), (val2))
+    verify_condition( \
+        (val1) != (val2), LINE_INFO, "'%c' Is not different from '%c'.", (val1), (val2) \
+    )
 
 #define LUKIP_BOOL_NOT_EQUAL(val1, val2) \
     verify_condition( \
