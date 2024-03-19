@@ -29,7 +29,7 @@ void failed_test() {
     LUKIP_EQUAL_WITHIN(2.352, 2.356, 3);
     LUKIP_NOT_EQUAL_WITHIN(2.352, 2.356, 3);
     LUKIP_HEX_EQUAL(0xA0, 0x9);
-    LUKIP_INT_EQUAL(5, 6);
+    LUKIP_INT16_EQUAL(5, 6);
     LUKIP_CUSTOM(1 == 2, "Failed custom: %d == %d.", 1, 2);
 }
 
