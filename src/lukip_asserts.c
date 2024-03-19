@@ -223,7 +223,7 @@ static void append_test(const TestFunc newTest) {
 
 /**
  * Calls a testing function (so its macros can be used),
- * then appends it. Also uses set up and tear down if they're set.
+ * then appends it. Also uses setup and teardown if they're set.
  */
 void test_func(const EmptyFunc funcToTest, const LineInfo caller) {
     if (lukip.setUp != NULL) {
@@ -282,19 +282,19 @@ static void assert_failure(const LineInfo newInfo, char *message) {
     append_failure(failure);
 }
 
-/** Sets both the new set up and tear down to be called between each test. */
-void make_test_suite(const EmptyFunc newSetUp, const EmptyFunc newTearDown) {
+/** Sets both the new setup and teardown to be called between each test. */
+void make_test_fixture(const EmptyFunc newSetUp, const EmptyFunc newTearDown) {
     lukip.setUp = newSetUp;
     lukip.tearDown = newTearDown;
 }
 
-/** Makes a new set up to be called between each test. */
+/** Makes a new setup to be called between each test. */
 void make_set_up(const EmptyFunc newSetUp) {
     lukip.setUp = newSetUp;
 }
 
-/** Makes a new tear down to be called between each test. */
-void make_tear_down(const EmptyFunc newTearDown) {
+/** Makes a new teardown to be called between each test. */
+void make_teardown(const EmptyFunc newTearDown) {
     lukip.tearDown = newTearDown;
 }
 

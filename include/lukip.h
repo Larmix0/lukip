@@ -23,34 +23,34 @@
 #define LUKIP_END() (end_lukip())
 
 /**
- * @brief Makes a new set up.
+ * @brief Makes a new setup.
  * 
- * The passed set up gets called before every test function is called.
+ * The passed setup gets called before every test function is called.
  * 
  * @param setUpFunc The function to be called before every test.
  */
 #define MAKE_SET_UP(setUpFunc) (make_set_up(setUpFunc))
 
 /**
- * @brief Makes a new tear down.
+ * @brief Makes a new teardown.
  * 
- * The passed tear down gets called after every test function has executed.
+ * The passed teardown gets called after every test function has executed.
  * 
  * @param tearDownFunc The function to be called after every test.
  */
-#define MAKE_TEAR_DOWN(tearDownFunc) (make_tear_down(tearDownFunc))
+#define MAKE_TEARDOWN(tearDownFunc) (make_teardown(tearDownFunc))
 
-/** Makes both a new set up and tear down at once. */
-#define MAKE_TEST_SUITE(setUpFunc, tearDownFunc) (make_test_suite(setUpFunc, tearDownFunc))
+/** Makes both a new setup and teardown at once. */
+#define RESET_TEST_FIXTURE(setUpFunc, tearDownFunc) (make_test_fixture(setUpFunc, tearDownFunc))
 
-/** Makes set up nothing. */
+/** Makes setup nothing. */
 #define RESET_SET_UP() (make_set_up(NULL))
 
-/** Makes tear down to nothing. */
-#define RESET_TEAR_DOWN() (make_tear_down(NULL))
+/** Makes teardown to nothing. */
+#define RESET_TEARDOWN() (make_teardown(NULL))
 
-/** Makes both set up and tear down nothing. */
-#define RESET_TEST_SUITE() (make_test_suite(NULL, NULL))
+/** Makes both setup and teardown nothing. */
+#define RESET_TEST_FIXTURE() (make_test_fixture(NULL, NULL))
 
 /**
  * @brief Tests the passed function

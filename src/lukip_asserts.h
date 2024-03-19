@@ -122,14 +122,14 @@ void end_lukip();
  */
 char *strf_alloc(const char *format, ...);
 
-/** Makes both a new set up and a new tear down. */
-void make_test_suite(const EmptyFunc newSetUp, const EmptyFunc newTearDown);
+/** Makes both a new setup and a new teardown. */
+void make_test_fixture(const EmptyFunc newSetUp, const EmptyFunc newTearDown);
 
-/** Calls passed set up function before every test. */
+/** Calls passed setup function before every test. */
 void make_set_up(const EmptyFunc newSetUp);
 
-/** Calls passed tear down function after every test. */
-void make_tear_down(const EmptyFunc newTearDown);
+/** Calls passed teardown function after every test. */
+void make_teardown(const EmptyFunc newTearDown);
 
 /**
  * @brief Performs a unit test on a function.
