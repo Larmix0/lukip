@@ -97,6 +97,8 @@ typedef struct {
     int testsCapacity;
     int testsLength;
     TestFunc *tests;
+    int asserts;
+    int failedAsserts;
 
     EmptyFunc setUp;
     EmptyFunc tearDown;

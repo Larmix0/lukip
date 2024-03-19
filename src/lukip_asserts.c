@@ -256,6 +256,8 @@ static void append_failure(Failure failure) {
 
 /** Sets information to success if it hasn't already failed or succeeded. */
 static void assert_success(const FuncInfo newInfo) {
+    lukip.asserts++;
+
     FuncInfo *info = &lukip.tests[lukip.testsLength - 1].info;
     if (info->status == UNKNOWN) {
         info->fileName = newInfo.fileName;
@@ -266,6 +268,9 @@ static void assert_success(const FuncInfo newInfo) {
 
 /** Sets the function's status to fail and appends the failed assert. */
 static void assert_failure(const LineInfo newInfo, char *message) {
+    lukip.asserts++;
+    lukip.failedAsserts++;
+
     FuncInfo *info = &lukip.tests[lukip.testsLength - 1].info;
     if (info->status == UNKNOWN) {
         info->fileName = newInfo.testInfo.fileName;
@@ -291,22 +296,6 @@ void make_set_up(const EmptyFunc newSetUp) {
 /** Makes a new tear down to be called between each test. */
 void make_tear_down(const EmptyFunc newTearDown) {
     lukip.tearDown = newTearDown;
-}
-
-/** 
- * Tries to verify the passed condition.
- * Otherwise, it creates a va_list for the passed error message to assert failure. 
- */
-void verify_condition(const bool condition, const LineInfo info, const char *format, ...) {
-    if (condition) {
-        assert_success(info.testInfo);
-        return;
-    }
-    va_list args;
-    va_start(args, format);
-    char *message = vstrf_alloc(format, &args);
-    assert_failure(info, message);
-    va_end(args);
 }
 
 /** Appends a single character to a DynamicMessage. */
@@ -370,6 +359,22 @@ static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_lis
         }
     }
     message->buffer[message->length] = '\0';
+}
+
+/** 
+ * Tries to verify the passed condition.
+ * Otherwise, it creates a va_list for the passed error message to assert failure. 
+ */
+void verify_condition(const bool condition, const LineInfo info, const char *format, ...) {
+    if (condition) {
+        assert_success(info.testInfo);
+        return;
+    }
+    va_list args;
+    va_start(args, format);
+    char *message = vstrf_alloc(format, &args);
+    assert_failure(info, message);
+    va_end(args);
 }
 
 /** 

@@ -126,9 +126,11 @@ static void show_fail(const LukipUnit *lukip, const double executionTime) {
     putchar('\n');
     long_line('=');
     errors_info(lukip);
+    long_line('=');
     printf(
-        "\nFailed with %i/%i test results in %.3lf seconds.\n\n",
-        lukip->testsLength - failures, lukip->testsLength, executionTime
+        "\nFailed with %d/%d tests and %d/%d assertions in %.3lf seconds.\n\n",
+        lukip->testsLength - failures, lukip->testsLength,
+        lukip->asserts - lukip->failedAsserts, lukip->asserts, executionTime
     );
     char *failMessage = strf_alloc("Failed in %.3lfs.", executionTime);
     long_line_message('=', failMessage, RED);
@@ -153,8 +155,8 @@ static void show_success(const LukipUnit *lukip, const double executionTime) {
     long_line('=');
     printf("[" GREEN "SUCCESS" DEFAULT "] ");
     printf(
-        "Successfully ran %d tests in %.3lf seconds.\n\n",
-        lukip->testsLength, executionTime
+        "Successfully ran %d tests with %d assertions in %.3lf seconds.\n\n",
+        lukip->testsLength, lukip->asserts, executionTime
     );
     printf("OK.\n\n");
 
