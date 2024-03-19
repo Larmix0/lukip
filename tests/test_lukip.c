@@ -61,8 +61,8 @@ void string_test() {
 
 int main() {
     LUKIP_INIT();
-    MAKE_SET_UP(set_up2);
-    MAKE_TEAR_DOWN(tear_down2);
+    MAKE_SETUP(set_up2);
+    MAKE_TEARDOWN(tear_down2);
 
     TEST(string_test2);
     TEST(failed_test);

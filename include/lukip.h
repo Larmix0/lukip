@@ -27,24 +27,24 @@
  * 
  * The passed setup gets called before every test function is called.
  * 
- * @param setUpFunc The function to be called before every test.
+ * @param setupFunc The function to be called before every test.
  */
-#define MAKE_SET_UP(setUpFunc) (make_set_up(setUpFunc))
+#define MAKE_SETUP(setupFunc) (make_setup(setupFunc))
 
 /**
  * @brief Makes a new teardown.
  * 
  * The passed teardown gets called after every test function has executed.
  * 
- * @param tearDownFunc The function to be called after every test.
+ * @param teardownFunc The function to be called after every test.
  */
-#define MAKE_TEARDOWN(tearDownFunc) (make_teardown(tearDownFunc))
+#define MAKE_TEARDOWN(teardownFunc) (make_teardown(teardownFunc))
 
 /** Makes both a new setup and teardown at once. */
-#define RESET_TEST_FIXTURE(setUpFunc, tearDownFunc) (make_test_fixture(setUpFunc, tearDownFunc))
+#define MAKE_TEST_FIXTURE(setupFunc, teardownFunc) (make_test_fixture(setupFunc, teardownFunc))
 
 /** Makes setup nothing. */
-#define RESET_SET_UP() (make_set_up(NULL))
+#define RESET_SETUP() (make_setup(NULL))
 
 /** Makes teardown to nothing. */
 #define RESET_TEARDOWN() (make_teardown(NULL))

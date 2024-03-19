@@ -100,8 +100,8 @@ typedef struct {
     int asserts;
     int failedAsserts;
 
-    EmptyFunc setUp;
-    EmptyFunc tearDown;
+    EmptyFunc setup;
+    EmptyFunc teardown;
     clock_t startTime;
     bool successful;
 } LukipUnit;
@@ -123,13 +123,13 @@ void end_lukip();
 char *strf_alloc(const char *format, ...);
 
 /** Makes both a new setup and a new teardown. */
-void make_test_fixture(const EmptyFunc newSetUp, const EmptyFunc newTearDown);
+void make_test_fixture(const EmptyFunc newSetup, const EmptyFunc newTeardown);
 
 /** Calls passed setup function before every test. */
-void make_set_up(const EmptyFunc newSetUp);
+void make_setup(const EmptyFunc newSetup);
 
 /** Calls passed teardown function after every test. */
-void make_teardown(const EmptyFunc newTearDown);
+void make_teardown(const EmptyFunc newTeardown);
 
 /**
  * @brief Performs a unit test on a function.

@@ -42,8 +42,8 @@ void init_lukip() {
     lukip.testsLength = 0;
     lukip.tests = NULL;
 
-    lukip.setUp = NULL;
-    lukip.tearDown = NULL;
+    lukip.setup = NULL;
+    lukip.teardown = NULL;
     lukip.startTime = clock();
     lukip.successful = true;
 }
@@ -226,8 +226,8 @@ static void append_test(const TestFunc newTest) {
  * then appends it. Also uses setup and teardown if they're set.
  */
 void test_func(const EmptyFunc funcToTest, const LineInfo caller) {
-    if (lukip.setUp != NULL) {
-        lukip.setUp();
+    if (lukip.setup != NULL) {
+        lukip.setup();
     }
     TestFunc testFunc;
     init_test(&testFunc);
@@ -236,8 +236,8 @@ void test_func(const EmptyFunc funcToTest, const LineInfo caller) {
 
     funcToTest();
 
-    if (lukip.tearDown != NULL) {
-        lukip.tearDown();
+    if (lukip.teardown != NULL) {
+        lukip.teardown();
     }
 }
 
@@ -283,19 +283,19 @@ static void assert_failure(const LineInfo newInfo, char *message) {
 }
 
 /** Sets both the new setup and teardown to be called between each test. */
-void make_test_fixture(const EmptyFunc newSetUp, const EmptyFunc newTearDown) {
-    lukip.setUp = newSetUp;
-    lukip.tearDown = newTearDown;
+void make_test_fixture(const EmptyFunc newSetup, const EmptyFunc newTeardown) {
+    lukip.setup = newSetup;
+    lukip.teardown = newTeardown;
 }
 
 /** Makes a new setup to be called between each test. */
-void make_set_up(const EmptyFunc newSetUp) {
-    lukip.setUp = newSetUp;
+void make_setup(const EmptyFunc newSetup) {
+    lukip.setup = newSetup;
 }
 
 /** Makes a new teardown to be called between each test. */
-void make_teardown(const EmptyFunc newTearDown) {
-    lukip.tearDown = newTearDown;
+void make_teardown(const EmptyFunc newTeardown) {
+    lukip.teardown = newTeardown;
 }
 
 /** Appends a single character to a DynamicMessage. */
