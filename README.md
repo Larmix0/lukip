@@ -43,11 +43,11 @@ use `make clean` to remove all object/binary/archive files generated.
 
 int globalNumber = 0;
 
-void set_up() {
+void setup_example() {
     globalNumber += 2;
     printf("Set up called, globalNumber: %d\n", globalNumber);
 }
-void tear_down() {
+void teardown_example() {
     globalNumber--;
     printf("Tear down called, globalNumber: %d\n", globalNumber);
 }
@@ -71,7 +71,7 @@ void successful_test() {
 
 int main() {
     LUKIP_INIT();
-    MAKE_TEST_SUITE(set_up, tear_down);
+    MAKE_TEST_FIXTURE(setup_example, teardown_example);
 
     TEST(failed_test); // Fails because of this.
     TEST(successful_test);
