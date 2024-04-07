@@ -3,7 +3,9 @@ CFLAGS = -Wall -Wextra -Wpedantic -g -Werror -Iinclude
 
 SRC_DIR = src
 TEST_DIR = tests
+
 BIN = bin
+EXE = lukip
 
 SRCS := $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c $(SRC_DIR)/*/*/*.c)
 TESTS := $(wildcard $(TEST_DIR)/*.c $(TEST_DIR)/*/*.c $(TEST_DIR)/*/*/*.c)
@@ -12,8 +14,6 @@ ifeq ($(OS), Windows_NT)
 	EXE = lukip.exe
 	SRCS := $(subst /,\,$(SRCS))
 	TESTS := $(subst /,\,$(TESTS))
-else
-	EXE = lukip
 endif
 
 OBJS = $(SRCS:.c=.o)
@@ -35,7 +35,11 @@ lib: $(OBJS)
 tests: $(EXE)
 
 $(EXE): $(BIN) $(OBJS) $(TEST_OBJS)
+ifeq ($(OS), Windows_NT)
+	$(CC) -o $<\$@ $(OBJS) $(TEST_OBJS)
+else
 	$(CC) -o $</$@ $(OBJS) $(TEST_OBJS)
+endif
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $^ -o $@
