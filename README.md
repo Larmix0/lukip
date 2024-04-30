@@ -43,41 +43,40 @@ use `make clean` to remove all object/binary/archive files generated.
 
 int globalNumber = 0;
 
-void setup_example() {
+TEST_FIXTURE(setup_example) {
     globalNumber += 2;
     printf("Set up called, globalNumber: %d\n", globalNumber);
 }
-void teardown_example() {
+
+TEST_FIXTURE(teardown_example) {
     globalNumber--;
     printf("Tear down called, globalNumber: %d\n", globalNumber);
 }
 
-void empty_test() {
+TEST_CASE(empty_test) {
     // Gives us a warning for having no assertions.
 }
 
-void failed_test() {
-    LUKIP_BOOL_EQUAL(true, false); // Fail.
-    LUKIP_INT_EQUAL(7, 7);
-    LUKIP_INT_EQUAL(4, 3); // Fail.
+TEST_CASE(failed_test) {
+    ASSERT_BOOL_EQUAL(true, false); // Fail.
+    ASSERT_INT_EQUAL(7, 7);
+    ASSERT_INT_EQUAL(4, 3); // Fail.
 }
 
-void successful_test() {
+TEST_CASE(successful_test) {
     int8_t five = 5;
-    LUKIP_INT_EQUAL(five, 5);
-    LUKIP_INT_EQUAL(2, 2);
-    LUKIP_BOOL_EQUAL(true, true);
+    ASSERT_INT_EQUAL(five, 5);
+    ASSERT_INT_EQUAL(2, 2);
+    ASSERT_BOOL_EQUAL(true, true);
 }
 
 int main() {
     LUKIP_INIT();
     MAKE_TEST_FIXTURE(setup_example, teardown_example);
 
-    TEST(failed_test); // Fails because of this.
     TEST(successful_test);
+    TEST(failed_test); // Fails because of this.
     TEST(empty_test);
-
-    LUKIP_END();
     return 0;
 }
 ```
@@ -87,7 +86,7 @@ int main() {
 #### If we remove/comment the third line of main `TEST(failed_test);` then the successful output looks like the following:
 ![success case](assets/success_screenshot.png)
 
-## Available assertions and their supported operations
+## Available assertions and their supported operands
 #### Signed numbers (==, !=, >, >=, <, <=)
 * int <br>
 * int8 <br>
@@ -131,11 +130,11 @@ instead of having to install other ones. Also because
 I'm personally about to start making a programming language,
 which I want to rely exclusively on my own code, including the testing framework.
 
-(It was also a nice learning experience.)
+(It was also a nice learning experience).
 
 ## Contributing
 I currently don't accept any contributions as this is a personal project.
 However, if you find any bugs then feel free to alert me by submitting an issue.
 
 ## Known issues
-* Better and more tests.
+* Better and more tests for Lukip's source.

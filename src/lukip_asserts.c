@@ -5,8 +5,9 @@
  * @author Larmix
  */
 
-#include <math.h>
+#include <errno.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 
@@ -36,18 +37,6 @@ static void free_failure_messages(TestFunc *failedFunc) {
     }
 }
 
-/** Initializes the Lukip unit to start the program. */
-void init_lukip() {
-    lukip.testsCapacity = 0;
-    lukip.testsLength = 0;
-    lukip.tests = NULL;
-
-    lukip.setup = NULL;
-    lukip.teardown = NULL;
-    lukip.startTime = clock();
-    lukip.successful = true;
-}
-
 /** Ends the Lukip unit, which is by displaying the results and freeing resources. */
 void end_lukip() {
     show_results(&lukip);
@@ -58,6 +47,24 @@ void end_lukip() {
         }
     }
     free(lukip.tests);
+}
+
+/** Initializes the Lukip unit to start the program, and sets end_lukip to run at exit. */
+void init_lukip() {
+    lukip.testsCapacity = 0;
+    lukip.testsLength = 0;
+    lukip.tests = NULL;
+
+    lukip.setup = NULL;
+    lukip.teardown = NULL;
+    lukip.startTime = clock();
+    lukip.hasFailed = false;
+    if (atexit(end_lukip) != 0) {
+        fprintf(
+            stderr, "Lukip failed to set a clean up at exit: %s (Errno %d)", strerror(errno), errno
+        );
+        exit(EXIT_FAILURE);
+    }
 }
 
 /** Initializes a FuncInfo struct. */
@@ -188,12 +195,12 @@ static void reverse_string(char *string) {
  * @param[in] value The LukipInt to extract the binary from.
  */
 static void sprint_int_as_bin(char *string, LukipInt value) {
-    const int byte_size = 8;
+    const int byteSize = 8;
     int bitsCopied = 0, length = 0;
 
     // Copy bits from right to left.
     while (value != 0) {
-        if (bitsCopied % byte_size == 0 && bitsCopied != 0) {
+        if (bitsCopied % byteSize == 0 && bitsCopied != 0) {
             string[length++] = ' ';
         }
         string[length++] = value & 1 ? '1' : '0';
@@ -201,7 +208,7 @@ static void sprint_int_as_bin(char *string, LukipInt value) {
         value >>= 1;
     }
     // Pad remaining bits
-    while (bitsCopied % byte_size != 0) {
+    while (bitsCopied % byteSize != 0) {
         string[length++] = '0';
         bitsCopied++;
     }
@@ -276,7 +283,7 @@ static void assert_failure(const LineInfo newInfo, char *message) {
         info->fileName = newInfo.testInfo.fileName;
         info->funcName = newInfo.testInfo.funcName;
     }
-    lukip.successful = false;
+    lukip.hasFailed = true;
     info->status = FAILURE;
     Failure failure = {.line=newInfo.line, .message=message};
     append_failure(failure);

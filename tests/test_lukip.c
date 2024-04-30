@@ -5,43 +5,43 @@
 #include "lukip.h"
 #include "included_tests.h"
 
-void temp_set_up() {
+TEST_FIXTURE(temp_set_up) {
     printf("Set Up activated!\n");
 }
 
-void temp_tear_down() {
+TEST_FIXTURE(temp_tear_down) {
     printf("Tear Down called!\n");
 }
 
-void empty_test() {
+TEST_CASE(empty_test) {
     // To see if we get warned for no assertions.
 }
 
-void failed_test() {
-    LUKIP_BOOL_EQUAL(true, false);
+TEST_CASE(failed_test) {
+    ASSERT_BOOL_EQUAL(true, false);
     int8_t five = 5;
-    LUKIP_INT_EQUAL(five, 7);
+    ASSERT_INT_EQUAL(five, 7);
 
     uint8_t bin1 = 112;
     unsigned long long bin2 = 1546744073709551615;
-    LUKIP_UBINARY_EQUAL(bin1, bin2);
+    ASSERT_UBINARY_EQUAL(bin1, bin2);
 
-    LUKIP_EQUAL_WITHIN(2.352, 2.356, 3);
-    LUKIP_NOT_EQUAL_WITHIN(2.352, 2.356, 3);
-    LUKIP_HEX_EQUAL(0xA0, 0x9);
-    LUKIP_INT16_EQUAL(5, 6);
-    LUKIP_CUSTOM(1 == 2, "Failed custom: %d == %d.", 1, 2);
+    ASSERT_EQUAL_WITHIN(2.352, 2.356, 3);
+    ASSERT_NOT_EQUAL_WITHIN(2.352, 2.356, 3);
+    ASSERT_HEX_EQUAL(0xA0, 0x9);
+    ASSERT_INT16_EQUAL(5, 6);
+    ASSERT_CUSTOM(1 == 2, "Failed custom: %d == %d.", 1, 2);
 }
 
-void successful_test() {
-    LUKIP_BOOL_EQUAL(true, true);
+TEST_CASE(successful_test) {
+    ASSERT_BOOL_EQUAL(true, true);
     int8_t five = 5;
-    LUKIP_INT_EQUAL(five, 5);
-    LUKIP_HEX_EQUAL(0x9, 0x009);
-    LUKIP_INT_EQUAL(2, 2);
+    ASSERT_INT_EQUAL(five, 5);
+    ASSERT_HEX_EQUAL(0x9, 0x009);
+    ASSERT_INT_EQUAL(2, 2);
 }
 
-void bytes_array_test() {
+TEST_CASE(bytes_array_test) {
     uint8_t bytesArray1[13];
     uint8_t bytesArray2[13];
     for (int i = 0; i * 20 < 255; i++) {
@@ -51,12 +51,12 @@ void bytes_array_test() {
         bytesArray2[i] = i * 20;
     }
     bytesArray2[8] = 9;
-    LUKIP_BYTES_EQUAL(bytesArray1, bytesArray2, 12);
+    ASSERT_BYTES_EQUAL(bytesArray1, bytesArray2, 12);
 }
 
-void string_test() {
+TEST_CASE(string_test) {
     char str1[10] = "string1", str2[10] = "string!";
-    LUKIP_STRING_EQUAL(str1, str2);
+    ASSERT_STRING_EQUAL(str1, str2);
 }
 
 int main() {
@@ -81,6 +81,5 @@ int main() {
     TEST(empty_test);
     TEST(string_test2);
 
-    LUKIP_END();
     return 0;
 }

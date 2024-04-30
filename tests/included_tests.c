@@ -5,16 +5,16 @@
 
 int globalNum = 0;
 
-void set_up2() {
+TEST_FIXTURE(set_up2) {
     globalNum += 2;
 }
 
-void tear_down2() {
+TEST_FIXTURE(tear_down2) {
     globalNum -= 1;
 }
 
-void string_test2() {
+TEST_CASE(string_test2) {
     printf("Global num is: %d\n", globalNum);
     char str1[10] = "string!9", str2[10] = "string!";
-    LUKIP_STRING_EQUAL(str1, str2);
+    ASSERT_STRING_EQUAL(str1, str2);
 }

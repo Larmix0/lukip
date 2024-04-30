@@ -97,13 +97,14 @@ typedef struct {
     int testsCapacity;
     int testsLength;
     TestFunc *tests;
+
     int asserts;
     int failedAsserts;
+    bool hasFailed;
 
     EmptyFunc setup;
     EmptyFunc teardown;
     clock_t startTime;
-    bool successful;
 } LukipUnit;
 
 /** Initializes the Lukip unit. */

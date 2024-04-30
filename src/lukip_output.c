@@ -176,9 +176,9 @@ void show_results(const LukipUnit *lukip) {
 
     const clock_t endTime = clock();
     const double executionTime = (double)(endTime - lukip->startTime) / CLOCKS_PER_SEC;
-    if (lukip->successful) {
-        show_success(lukip, executionTime);
-    } else {
+    if (lukip->hasFailed) {
         show_fail(lukip, executionTime);
+    } else {
+        show_success(lukip, executionTime);
     }
 }
