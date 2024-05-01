@@ -23,7 +23,7 @@
 #define TEST_CASE(name) void name()
 
 /** Same as TEST_CASE, but ensures the function is only visible in current translation unit. */
-#define PRIVATE_TEST_CASE(name) (static TEST_CASE(name))
+#define PRIVATE_TEST_CASE(name) static TEST_CASE(name)
 
 /** Currently same as TEST_CASE, but it's made for fixtures in case the implementation changes. */
 #define TEST_FIXTURE(name) void name()
