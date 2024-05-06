@@ -54,6 +54,16 @@ static void long_line_message(char lineChar, char *message, char *mode) {
     putchar('\n');
 }
 
+/** Print the passed format as a warning message. */
+static void print_warning(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    printf("[" YELLOW "WARNING" DEFAULT "] ");
+    vprintf(format, args);
+    va_end(args);
+}
+
 /**
  * @brief Show a warning message for every function with unknown status (had no asserts).
  * 
@@ -67,10 +77,21 @@ static void show_warnings(const LukipUnit *lukip) {
         }
         hadWarnings = true;
         const LineInfo *caller = &lukip->tests[i].caller;
-        printf("[" YELLOW "WARNING" DEFAULT "] ");
-        printf(
-            "Function called in line %d: %s|%s() had no assertions.\n",
+        print_warning(
+            "Function called in line %d, %s|%s() had no assertions.\n",
             caller->line, caller->testInfo.fileName, caller->testInfo.funcName
+        );
+    }
+
+    if (lukip->warnsLength != 0) {
+        hadWarnings = true;
+    }
+    for (int i = 0; i < lukip->warnsLength; i++) {
+        Warning warning = lukip->warnings[i];
+        print_warning(
+            "Line %d: %s|%s(): %s\n",
+            warning.location.line, warning.location.testInfo.fileName,
+            warning.location.testInfo.funcName, warning.message
         );
     }
     if (hadWarnings) {

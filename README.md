@@ -118,11 +118,17 @@ int main() {
 * string <br>
 * is NULL <br>
 
+#### Raise (automatically outputs a result)
+* Failure <br>
+* Failure with a custom formatted message <br>
+* Warning <br>
+* Warning with a custom formatted message <br>
+
 #### Special
 * is true <br>
 * is false <br>
-* is condition <br>
-* is custom (allows a custom error message)
+* is condition (another name for is true) <br>
+* is custom (same as is true, but with a custom formatted message)
 
 ## Why I made Lukip
 For fun as well as having a small, easy-to-use unit-testing framework in C,

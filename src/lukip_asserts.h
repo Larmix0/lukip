@@ -48,6 +48,11 @@ typedef enum {
     ASSERT_NOT_EQUAL
 } AssertOp;
 
+typedef enum {
+    RAISE_WARN,
+    RAISE_FAIL
+} RaiseType;
+
 /** The current status of a given test. */
 typedef enum {
     UNKNOWN,
@@ -81,6 +86,11 @@ typedef struct {
     int line;
 } Failure;
 
+typedef struct {
+    char *message;
+    LineInfo location;
+} Warning;
+
 /** Information of a function used for testing as a whole. */
 typedef struct {
     int failsCapacity;
@@ -97,6 +107,10 @@ typedef struct {
     int testsCapacity;
     int testsLength;
     TestFunc *tests;
+
+    int warnsCapacity;
+    int warnsLength;
+    Warning *warnings;
 
     int asserts;
     int failedAsserts;
@@ -199,5 +213,15 @@ void verify_precision(
     const LukipFloat float1, const LukipFloat float2, const int digitPrecision,
     const LineInfo info, const AssertOp op
 );
+
+/**
+ * @brief Raises some form of assert type immediately without any conditions.
+ * 
+ * @param type The type of raise being done.
+ * @param info The line information of the assert.
+ * @param format The formatted message to be written in the raise.
+ * @param ... Arguments for the format.
+ */
+void raise_assert(const RaiseType type, const LineInfo info, const char *format, ...);
 
 #endif

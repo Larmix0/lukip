@@ -67,7 +67,7 @@
  */
 #define TEST(funcToTest) (test_func(funcToTest, LINE_INFO))
 
-// ============================== NUMBER EQUAL ================================
+// ============================ NUMBER EQUAL =======================================================
 
 #define ASSERT_INT_EQUAL(val1, val2) \
     (verify_condition((val1) == (val2), LINE_INFO, "%d Does not equal %d.", (val1), (val2)))
@@ -159,7 +159,7 @@
          (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     ))
 
-// ============================ NUMBER GREATER ================================
+// ======================== NUMBER GREATER =========================================================
 
 #define ASSERT_INT_GREATER(val1, val2) \
     (verify_condition( \
@@ -276,7 +276,7 @@
          (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     ))
 
-// ======================== NUMBER GREATER OR EQUAL ===========================
+// ====================== NUMBER GREATER OR EQUAL ==================================================
 
 #define ASSERT_INT_GREATER_EQUAL(val1, val2) \
     (verify_condition( \
@@ -399,7 +399,7 @@
          (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     ))
 
-// ============================= NUMBER LESS ==================================
+// ========================== NUMBER LESS ==========================================================
 
 #define ASSERT_INT_LESS(val1, val2) \
     (verify_condition((val1) < (val2), LINE_INFO, "%d Is not less than %d.", (val1), (val2)))
@@ -494,7 +494,7 @@
          (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     ))
 
-// ============================== LESS OR EQUAL ================================
+// ============================ LESS OR EQUAL ======================================================
 
 #define ASSERT_INT_LESS_EQUAL(val1, val2) \
     (verify_condition( \
@@ -611,7 +611,7 @@
         (val1), (val2), (LukipUnsigned)(val1), (LukipUnsigned)(val2) \
     ))
 
-// ========================== NUMBER NOT EQUAL =============================
+// ========================= NUMBER NOT EQUAL ======================================================
 
 #define ASSERT_INT_NOT_EQUAL(val1, val2) \
     (verify_condition( \
@@ -728,7 +728,7 @@
         (val1) != (val2), LINE_INFO, "%f Is not different from %f.", (val1), (val2) \
     ))
 
-// ===================== TRUE (things without comparisons) =====================
+// ======================= TRUE (without comparisons) ==============================================
 
 #define ASSERT_WITHIN_EQUAL(val1, val2, precision) \
     (verify_precision(val1, val2, precision, LINE_INFO, ASSERT_EQUAL))
@@ -756,7 +756,7 @@
 #define ASSERT_NULL(val) \
     (verify_condition((val) == NULL, LINE_INFO, "%p Does not equal NULL.", (val)))
 
-// ===================== FALSE (things without comparisons) =====================
+// ======================= FALSE (without comparisons) =============================================
 
 #define ASSERT_WITHIN_NOT_EQUAL(val1, val2, precision) \
     (verify_precision(val1, val2, precision, LINE_INFO, ASSERT_NOT_EQUAL))
@@ -788,7 +788,17 @@
 #define ASSERT_NOT_NULL(val) \
     (verify_condition((val) != NULL, LINE_INFO, "%p Is not different from NULL.", (val)))
 
-// =============================== SPECIAL =====================================
+// =================================== RAISE =======================================================
+
+#define ASSERT_RAISE_FAIL() (raise_assert(RAISE_FAIL, LINE_INFO, "Failure raised."))
+
+#define ASSERT_RAISE_FAIL_MESSAGE(...) (raise_assert(RAISE_FAIL, LINE_INFO, __VA_ARGS__))
+
+#define ASSERT_RAISE_WARN() (raise_assert(RAISE_WARN, LINE_INFO, "Warning raised."))
+
+#define ASSERT_RAISE_WARN_MESSAGE(...) (raise_assert(RAISE_WARN, LINE_INFO, __VA_ARGS__))
+
+// =============================== MISCELLANEOUS ===================================================
 
 #define ASSERT_TRUE(val) \
     (verify_condition((val) == true, LINE_INFO, "false Does not equal true."))

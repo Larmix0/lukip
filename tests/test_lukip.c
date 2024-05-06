@@ -54,6 +54,13 @@ TEST_CASE(bytes_array_test) {
     ASSERT_BYTES_EQUAL(bytesArray1, bytesArray2, 12);
 }
 
+TEST_CASE(raise_test) {
+    ASSERT_RAISE_FAIL_MESSAGE("Fail raise test.");
+    ASSERT_RAISE_FAIL();
+    ASSERT_RAISE_WARN_MESSAGE("Raise warn test.");
+    ASSERT_RAISE_WARN();
+}
+
 TEST_CASE(string_test) {
     char str1[10] = "string1", str2[10] = "string!";
     ASSERT_STRING_EQUAL(str1, str2);
@@ -66,7 +73,7 @@ int main() {
 
     TEST(string_test2);
     TEST(failed_test);
-    TEST(successful_test);
+    TEST(raise_test);
     TEST(successful_test);
 
     // waste time

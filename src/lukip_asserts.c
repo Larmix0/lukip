@@ -40,6 +40,11 @@ static void free_failure_messages(TestFunc *failedFunc) {
 /** Ends the Lukip unit, which is by displaying the results and freeing resources. */
 void end_lukip() {
     show_results(&lukip);
+    for (int i = 0; i < lukip.warnsLength; i++) {
+        free(lukip.warnings[i].message);
+    }
+    free(lukip.warnings);
+
     for (int i = 0; i < lukip.testsLength; i++) {
         if (lukip.tests[i].info.status == FAILURE) {
             free_failure_messages(&lukip.tests[i]);
@@ -54,6 +59,10 @@ void init_lukip() {
     lukip.testsCapacity = 0;
     lukip.testsLength = 0;
     lukip.tests = NULL;
+
+    lukip.warnsCapacity = 0;
+    lukip.warnsLength = 0;
+    lukip.warnings = NULL;
 
     lukip.setup = NULL;
     lukip.teardown = NULL;
@@ -261,6 +270,17 @@ static void append_failure(Failure failure) {
     testFunc->failures[testFunc->failsLength++] = failure;
 }
 
+/** Appends a passed warning to lukip. */
+static void append_warning(Warning warning) {
+    if (lukip.warnsCapacity < lukip.warnsLength + 1) {
+        lukip.warnsCapacity = GROW_CAPACITY(lukip.warnsCapacity);
+        lukip.warnings = reallocate(
+            lukip.warnings, lukip.warnsCapacity, sizeof(Warning)
+        );
+    }
+    lukip.warnings[lukip.warnsLength++] = warning;
+}
+
 /** Sets information to success if it hasn't already failed or succeeded. */
 static void assert_success(const FuncInfo newInfo) {
     lukip.asserts++;
@@ -317,8 +337,11 @@ static void append_message_char(DynamicMessage *message, char ch) {
     message->buffer[message->length++] = ch;
 }
 
+
+// TODO: change this to actually using vsnprintf. First vsnprintf into a buffer,
+// then look at any %b on the printed buffer, and create a second buffer where those are resolved.
 /**
- * @brief vsprintf(), but on a DynamicMessage and it allows %b binary format.
+ * @brief vsprintf(), but on a DynamicMessage and it allows %b binary integer format.
  * 
  * @param[out] message The message to be appended the formatted string.
  * @param[in] format The formatted message.
@@ -571,4 +594,19 @@ void verify_precision(
             float1, float2, digitPrecision
         );
     }
+}
+
+/** Raises some form of assert type immediately without any conditions. */
+void raise_assert(const RaiseType type, const LineInfo info, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    char *message = vstrf_alloc(format, &args);
+
+    if (type == RAISE_FAIL) {
+        assert_failure(info, message);
+    } else if (type == RAISE_WARN) {
+        Warning warning = {.location=info, .message=message};
+        append_warning(warning);
+    }
+    va_end(args);
 }
