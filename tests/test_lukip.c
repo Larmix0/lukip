@@ -26,8 +26,8 @@ TEST_CASE(failed_test) {
     unsigned long long bin2 = 1546744073709551615;
     ASSERT_UBINARY_EQUAL(bin1, bin2);
 
-    ASSERT_EQUAL_WITHIN(2.352, 2.356, 3);
-    ASSERT_NOT_EQUAL_WITHIN(2.352, 2.356, 3);
+    ASSERT_WITHIN_EQUAL(2.352, 2.356, 3);
+    ASSERT_WITHIN_NOT_EQUAL(2.352, 2.356, 3);
     ASSERT_HEX_EQUAL(0xA0, 0x9);
     ASSERT_INT16_EQUAL(5, 6);
     ASSERT_CUSTOM(1 == 2, "Failed custom: %d == %d.", 1, 2);

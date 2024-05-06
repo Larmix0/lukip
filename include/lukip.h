@@ -730,7 +730,7 @@
 
 // ===================== TRUE (things without comparisons) =====================
 
-#define ASSERT_EQUAL_WITHIN(val1, val2, precision) \
+#define ASSERT_WITHIN_EQUAL(val1, val2, precision) \
     (verify_precision(val1, val2, precision, LINE_INFO, ASSERT_EQUAL))
 
 #define ASSERT_CHAR_EQUAL(val1, val2) \
@@ -758,7 +758,7 @@
 
 // ===================== FALSE (things without comparisons) =====================
 
-#define ASSERT_NOT_EQUAL_WITHIN(val1, val2, precision) \
+#define ASSERT_WITHIN_NOT_EQUAL(val1, val2, precision) \
     (verify_precision(val1, val2, precision, LINE_INFO, ASSERT_NOT_EQUAL))
 
 #define ASSERT_CHAR_NOT_EQUAL(val1, val2) \
