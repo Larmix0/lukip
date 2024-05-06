@@ -18,6 +18,7 @@
 #include <time.h>
 
 #include "lukip.h"
+#include "dynamic_array.h"
 
 /** Pastes all information before function call (file name, function name, and line.). */
 #define LINE_INFO \
@@ -86,39 +87,39 @@ typedef struct {
     int line;
 } Failure;
 
+/** Array of failure asserts in test functions. */
+DECLARE_DA_STRUCT(FailureArray, Failure);
+
 typedef struct {
     char *message;
     LineInfo location;
 } Warning;
 
+/** Array of warnings during testing. */
+DECLARE_DA_STRUCT(WarningArray, Warning);
+
 /** Information of a function used for testing as a whole. */
 typedef struct {
-    int failsCapacity;
-    int failsLength;
-    Failure *failures;
-
+    FailureArray failures;
     LineInfo caller;
     FuncInfo info;
     EmptyFunc testFunc;
 } TestFunc;
 
+/** An array of tested functions. */
+DECLARE_DA_STRUCT(TestFuncArray, TestFunc);
+
 /** The main struct which stores the fields used for unit-testing. */
 typedef struct {
-    int testsCapacity;
-    int testsLength;
-    TestFunc *tests;
-
-    int warnsCapacity;
-    int warnsLength;
-    Warning *warnings;
-
-    int asserts;
-    int failedAsserts;
-    bool hasFailed;
+    TestFuncArray tests;
+    WarningArray warnings;
 
     EmptyFunc setup;
     EmptyFunc teardown;
     clock_t startTime;
+    int asserts;
+    int failedAsserts;
+    bool hasFailed;
 } LukipUnit;
 
 /** Initializes the Lukip unit. */

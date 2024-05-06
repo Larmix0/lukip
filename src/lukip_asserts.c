@@ -11,6 +11,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "dynamic_array.h"
 #include "lukip_asserts.h"
 #include "lukip_output.h"
 
@@ -21,48 +22,45 @@
 #define BUFFER_LENGTH 256
 
 /** Dynamically growable string. */
-typedef struct {
-    int capacity;
-    int length;
-    char *buffer;
-} DynamicMessage;
+DECLARE_DA_STRUCT(DynamicMessage, char);
 
 static char buffer[BUFFER_LENGTH]; /** Temporary buffer. */
 static LukipUnit lukip; /** The unit which stores the unit-test's info. */
 
+/** Initializes the passed dynamic message with a NUL terminator. Use this over INIT_DA. */
+static void init_message(DynamicMessage *message) {
+    INIT_DA(message);
+    APPEND_DA(message, '\0');
+}
+
 /** frees all failure messages of a test function which had failures. */
 static void free_failure_messages(TestFunc *failedFunc) {
-    for (int i = 0; i < failedFunc->failsLength; i++) {
-        free(failedFunc->failures[i].message);
+    for (int i = 0; i < failedFunc->failures.length; i++) {
+        free(failedFunc->failures.data[i].message);
     }
 }
 
 /** Ends the Lukip unit, which is by displaying the results and freeing resources. */
 void end_lukip() {
     show_results(&lukip);
-    for (int i = 0; i < lukip.warnsLength; i++) {
-        free(lukip.warnings[i].message);
+    for (int i = 0; i < lukip.warnings.length; i++) {
+        free(lukip.warnings.data[i].message);
     }
-    free(lukip.warnings);
+    FREE_DA(&lukip.warnings);
 
-    for (int i = 0; i < lukip.testsLength; i++) {
-        if (lukip.tests[i].info.status == FAILURE) {
-            free_failure_messages(&lukip.tests[i]);
-            free(lukip.tests[i].failures);
+    for (int i = 0; i < lukip.tests.length; i++) {
+        if (lukip.tests.data[i].info.status == FAILURE) {
+            free_failure_messages(&lukip.tests.data[i]);
+            FREE_DA(&lukip.tests.data[i].failures);
         }
     }
-    free(lukip.tests);
+    FREE_DA(&lukip.tests);
 }
 
 /** Initializes the Lukip unit to start the program, and sets end_lukip to run at exit. */
 void init_lukip() {
-    lukip.testsCapacity = 0;
-    lukip.testsLength = 0;
-    lukip.tests = NULL;
-
-    lukip.warnsCapacity = 0;
-    lukip.warnsLength = 0;
-    lukip.warnings = NULL;
+    INIT_DA(&lukip.tests);
+    INIT_DA(&lukip.warnings);
 
     lukip.setup = NULL;
     lukip.teardown = NULL;
@@ -91,52 +89,10 @@ static void init_line_info(LineInfo *info) {
 
 /** Initializes a function which has tests. */
 static void init_test(TestFunc *test) {
-    test->failsCapacity = 0;
-    test->failsLength = 0;
-    test->failures = NULL;
+    INIT_DA(&test->failures);
     test->testFunc = NULL;
     init_func_info(&test->info);
     init_line_info(&test->caller);
-}
-
-/** Initializes a DynamicMessage which is a heap growable string. */
-static void init_dynamic_message(DynamicMessage *message) {
-    message->length = 0;
-    message->capacity = 0;
-    message->buffer = NULL;
-}
-
-/**
- * @brief Allocates from the heap and checks for NULL itself. 
- * 
- * @param size The amount of elements to be allocated.
- * @param elementSize The size of each element.
- * 
- * @return Allocated pointer.
- */
-static void *allocate(const int size, const size_t elementSize) {
-    void *result = malloc(size * elementSize);
-    if (result == NULL) {
-        exit(1);
-    }
-    return result;
-}
-
-/**
- * @brief Reallocates a certain heap pointer and checks for NULL itself.
- * 
- * @param pointer The pointer to be reallocated.
- * @param newSize The new amount of elements it should be able to hold.
- * @param elementSize The size of each element it holds.
- * 
- * @return The new reallocated pointer.
- */
-static void *reallocate(void *pointer, const int newSize, const size_t elementSize) {
-    void *result = realloc(pointer, newSize * elementSize);
-    if (result == NULL) {
-        exit(1);
-    }
-    return result;
 }
 
 /**
@@ -173,13 +129,11 @@ char *strf_alloc(const char *format, ...) {
 static void append_message_string(DynamicMessage *message, const char *string) {
     const int srcLength = strlen(string);
 
-    if (message->length + srcLength + 1 >= message->capacity) {
-        message->capacity += srcLength * 2;
-        message->buffer = reallocate(message->buffer, message->capacity, sizeof(char));
+    DROP_DA(message); // Pop NUL temporarily.
+    for (int i = 0; i < srcLength; i++) {
+        APPEND_DA(message, string[i]);
     }
-    message->buffer[message->length] = '\0';
-    strncat(message->buffer, string, srcLength);
-    message->length += srcLength;
+    APPEND_DA(message, '\0'); // Put it back on.
 }
 
 /** Reverses a string in place. */
@@ -226,17 +180,6 @@ static void sprint_int_as_bin(char *string, LukipInt value) {
     reverse_string(string);
 }
 
-/** Appends a testing function to Lukip */
-static void append_test(const TestFunc newTest) {
-    if (lukip.testsCapacity < lukip.testsLength + 1) {
-        lukip.testsCapacity = GROW_CAPACITY(lukip.testsCapacity);
-        lukip.tests = reallocate(
-            lukip.tests, lukip.testsCapacity, sizeof(TestFunc)
-        );
-    }
-    lukip.tests[lukip.testsLength++] = newTest;
-}
-
 /**
  * Calls a testing function (so its macros can be used),
  * then appends it. Also uses setup and teardown if they're set.
@@ -248,7 +191,7 @@ void test_func(const EmptyFunc funcToTest, const LineInfo caller) {
     TestFunc testFunc;
     init_test(&testFunc);
     testFunc.caller = caller;
-    append_test(testFunc);
+    APPEND_DA(&lukip.tests, testFunc);
 
     funcToTest();
 
@@ -257,35 +200,11 @@ void test_func(const EmptyFunc funcToTest, const LineInfo caller) {
     }
 }
 
-/** Append a failure to the failure array of the function we're currently testing. */
-static void append_failure(Failure failure) {
-    TestFunc *testFunc = &lukip.tests[lukip.testsLength - 1];
-
-    if (testFunc->failsCapacity < testFunc->failsLength + 1) {
-        testFunc->failsCapacity = GROW_CAPACITY(testFunc->failsCapacity);
-        testFunc->failures = reallocate(
-            testFunc->failures, testFunc->failsCapacity, sizeof(Failure)
-        );
-    }
-    testFunc->failures[testFunc->failsLength++] = failure;
-}
-
-/** Appends a passed warning to lukip. */
-static void append_warning(Warning warning) {
-    if (lukip.warnsCapacity < lukip.warnsLength + 1) {
-        lukip.warnsCapacity = GROW_CAPACITY(lukip.warnsCapacity);
-        lukip.warnings = reallocate(
-            lukip.warnings, lukip.warnsCapacity, sizeof(Warning)
-        );
-    }
-    lukip.warnings[lukip.warnsLength++] = warning;
-}
-
 /** Sets information to success if it hasn't already failed or succeeded. */
 static void assert_success(const FuncInfo newInfo) {
     lukip.asserts++;
 
-    FuncInfo *info = &lukip.tests[lukip.testsLength - 1].info;
+    FuncInfo *info = &lukip.tests.data[lukip.tests.length - 1].info;
     if (info->status == UNKNOWN) {
         info->fileName = newInfo.fileName;
         info->funcName = newInfo.funcName;
@@ -298,7 +217,7 @@ static void assert_failure(const LineInfo newInfo, char *message) {
     lukip.asserts++;
     lukip.failedAsserts++;
 
-    FuncInfo *info = &lukip.tests[lukip.testsLength - 1].info;
+    FuncInfo *info = &lukip.tests.data[lukip.tests.length - 1].info;
     if (info->status == UNKNOWN) {
         info->fileName = newInfo.testInfo.fileName;
         info->funcName = newInfo.testInfo.funcName;
@@ -306,7 +225,7 @@ static void assert_failure(const LineInfo newInfo, char *message) {
     lukip.hasFailed = true;
     info->status = FAILURE;
     Failure failure = {.line=newInfo.line, .message=message};
-    append_failure(failure);
+    APPEND_DA(&lukip.tests.data[lukip.tests.length - 1].failures, failure);
 }
 
 /** Sets both the new setup and teardown to be called between each test. */
@@ -325,18 +244,13 @@ void make_teardown(const EmptyFunc newTeardown) {
     lukip.teardown = newTeardown;
 }
 
-/** Appends a single character to a DynamicMessage. */
+/** Appends a single character to a DynamicMessage while keeping it NUL terminated. */
 static void append_message_char(DynamicMessage *message, char ch) {
-    // + 2 to always have space for NUL.
-    if (message->length + 2 >= message->capacity) {
-        message->capacity = GROW_CAPACITY(message->capacity);
-        message->buffer = reallocate(
-            message->buffer, message->capacity, sizeof(char)
-        );
-    }
-    message->buffer[message->length++] = ch;
+    // Temporarily pop NUL and put it back on.
+    DROP_DA(message);
+    APPEND_DA(message, ch);
+    APPEND_DA(message, '\0');
 }
-
 
 // TODO: change this to actually using vsnprintf. First vsnprintf into a buffer,
 // then look at any %b on the printed buffer, and create a second buffer where those are resolved.
@@ -388,7 +302,7 @@ static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_lis
             break;
         }
     }
-    message->buffer[message->length] = '\0';
+    message->data[message->length] = '\0';
 }
 
 /** 
@@ -419,10 +333,10 @@ void verify_binary(const bool condition, const LineInfo info, const char *format
     va_list args;
     va_start(args, format);
     DynamicMessage message;
-    init_dynamic_message(&message);
+    init_message(&message);
 
     bin_str_vsprintf(&message, format, &args);
-    assert_failure(info, message.buffer);
+    assert_failure(info, message.data);
     va_end(args);
 }
 
@@ -606,7 +520,7 @@ void raise_assert(const RaiseType type, const LineInfo info, const char *format,
         assert_failure(info, message);
     } else if (type == RAISE_WARN) {
         Warning warning = {.location=info, .message=message};
-        append_warning(warning);
+        APPEND_DA(&lukip.warnings, warning);
     }
     va_end(args);
 }

@@ -71,23 +71,23 @@ static void print_warning(const char *format, ...) {
  */
 static void show_warnings(const LukipUnit *lukip) {
     bool hadWarnings = false;
-    for (int i = 0; i < lukip->testsLength; i++) {
-        if (lukip->tests[i].info.status != UNKNOWN) {
+    for (int i = 0; i < lukip->tests.length; i++) {
+        if (lukip->tests.data[i].info.status != UNKNOWN) {
             continue; // No need to warn.
         }
         hadWarnings = true;
-        const LineInfo *caller = &lukip->tests[i].caller;
+        const LineInfo *caller = &lukip->tests.data[i].caller;
         print_warning(
             "Function called in line %d, %s|%s() had no assertions.\n",
             caller->line, caller->testInfo.fileName, caller->testInfo.funcName
         );
     }
 
-    if (lukip->warnsLength != 0) {
+    if (lukip->warnings.length != 0) {
         hadWarnings = true;
     }
-    for (int i = 0; i < lukip->warnsLength; i++) {
-        Warning warning = lukip->warnings[i];
+    for (int i = 0; i < lukip->warnings.length; i++) {
+        Warning warning = lukip->warnings.data[i];
         print_warning(
             "Line %d: %s|%s(): %s\n",
             warning.location.line, warning.location.testInfo.fileName,
@@ -105,19 +105,17 @@ static void show_warnings(const LukipUnit *lukip) {
  * @param lukip The Lukip unit to show the errors of.
  */
 static void errors_info(const LukipUnit *lukip) {
-    for (int i = 0; i < lukip->testsLength; i++) {
-        const TestFunc *test = &lukip->tests[i];
+    for (int i = 0; i < lukip->tests.length; i++) {
+        const TestFunc *test = &lukip->tests.data[i];
         if (test->info.status != FAILURE) {
             continue;
         }
-        for (int j = 0; j < test->failsLength; j++) {
+        for (int j = 0; j < test->failures.length; j++) {
+            Failure failure = test->failures.data[j];
             printf("[" RED "FAIL" DEFAULT "] ");
             printf(
                 "Line %d: %s|%s(): %s\n",
-                test->failures[j].line,
-                test->info.fileName,
-                test->info.funcName,
-                test->failures[j].message
+                failure.line, test->info.fileName, test->info.funcName, failure.message
             );
         }
     }
@@ -134,11 +132,11 @@ static void errors_info(const LukipUnit *lukip) {
  */
 static void show_fail(const LukipUnit *lukip, const double executionTime) {
     int failures = 0;
-    for (int i = 0; i < lukip->testsLength; i++) {
-        if (lukip->tests[i].info.status == FAILURE) {
+    for (int i = 0; i < lukip->tests.length; i++) {
+        if (lukip->tests.data[i].info.status == FAILURE) {
             putchar('F');
             failures++;
-        } else if (lukip->tests[i].info.status == SUCCESS) {
+        } else if (lukip->tests.data[i].info.status == SUCCESS) {
             putchar('.');
         } else {
             putchar('?');
@@ -150,7 +148,7 @@ static void show_fail(const LukipUnit *lukip, const double executionTime) {
     long_line('=');
     printf(
         "\nFailed with %d/%d tests (%d/%d assertions) in %.3lf seconds.\n\n",
-        lukip->testsLength - failures, lukip->testsLength,
+        lukip->tests.length - failures, lukip->tests.length,
         lukip->asserts - lukip->failedAsserts, lukip->asserts, executionTime
     );
     char *failMessage = strf_alloc("Failed in %.3lfs.", executionTime);
@@ -169,15 +167,15 @@ static void show_fail(const LukipUnit *lukip, const double executionTime) {
  * @param executionTime The time it took the program to execute.
  */
 static void show_success(const LukipUnit *lukip, const double executionTime) {
-    for (int i = 0; i < lukip->testsLength; i++) {
-        lukip->tests[i].info.status == SUCCESS ? putchar('.') : putchar('?');
+    for (int i = 0; i < lukip->tests.length; i++) {
+        lukip->tests.data[i].info.status == SUCCESS ? putchar('.') : putchar('?');
     }
     putchar('\n');
     long_line('=');
     printf("[" GREEN "SUCCESS" DEFAULT "] ");
     printf(
         "Successfully ran %d tests (%d assertions total) in %.3lf seconds.\n\n",
-        lukip->testsLength, lukip->asserts, executionTime
+        lukip->tests.length, lukip->asserts, executionTime
     );
     printf("OK.\n\n");
 
