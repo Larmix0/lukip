@@ -148,39 +148,6 @@ static void reverse_string(char *string) {
 }
 
 /**
- * @brief Pastes an int on a string as a binary number.
- * 
- * Iterates over the LukipInt and grabs its bits right to left,
- * and ads a padding space every byte for readability as well as
- * padding the last byte with zeroes so all bytes are 8 zeroes.
- * 
- * @param[out] string The string which stores the binary output.
- * @param[in] value The LukipInt to extract the binary from.
- */
-static void sprint_int_as_bin(char *string, LukipInt value) {
-    const int byteSize = 8;
-    int bitsCopied = 0, length = 0;
-
-    // Copy bits from right to left.
-    while (value != 0) {
-        if (bitsCopied % byteSize == 0 && bitsCopied != 0) {
-            string[length++] = ' ';
-        }
-        string[length++] = value & 1 ? '1' : '0';
-        bitsCopied++;
-        value >>= 1;
-    }
-    // Pad remaining bits
-    while (bitsCopied % byteSize != 0) {
-        string[length++] = '0';
-        bitsCopied++;
-    }
-    // We were copying right to left, but strings go from left to right, so reverse.
-    string[length] = '\0';
-    reverse_string(string);
-}
-
-/**
  * Calls a testing function (so its macros can be used),
  * then appends it. Also uses setup and teardown if they're set.
  */
@@ -252,16 +219,49 @@ static void append_message_char(DynamicMessage *message, char ch) {
     APPEND_DA(message, '\0');
 }
 
-// TODO: change this to actually using vsnprintf. First vsnprintf into a buffer,
-// then look at any %b on the printed buffer, and create a second buffer where those are resolved.
 /**
- * @brief vsprintf(), but on a DynamicMessage and it allows %b binary integer format.
+ * @brief Pastes an int on a string as a binary number.
+ * 
+ * Iterates over the LukipInt and grabs its bits right to left,
+ * and ads a padding space every byte for readability as well as
+ * padding the last byte with zeroes so all bytes are 8 zeroes.
+ * 
+ * @param[out] string The string which stores the binary output.
+ * @param[in] value The LukipInt to extract the binary from.
+ */
+static void append_int_as_binary(char *string, LukipInt value) {
+    const int byteSize = 8;
+    int bitsCopied = 0, length = 0;
+
+    // Copy bits from right to left.
+    while (value != 0) {
+        if (bitsCopied % byteSize == 0 && bitsCopied != 0) {
+            string[length++] = ' ';
+        }
+        string[length++] = value & 1 ? '1' : '0';
+        bitsCopied++;
+        value >>= 1;
+    }
+    // Pad remaining bits
+    while (bitsCopied % byteSize != 0) {
+        string[length++] = '0';
+        bitsCopied++;
+    }
+    // We were copying right to left, but strings go from left to right, so reverse.
+    string[length] = '\0';
+    reverse_string(string);
+}
+
+/**
+ * @brief Appends a binary formatted string, where each "%b" expects an integer argument.
+ * 
+ * @note This only handles %b format, not other formats you'd expect from printf for example.
  * 
  * @param[out] message The message to be appended the formatted string.
  * @param[in] format The formatted message.
  * @param[in] args Arguments for the format.
  */
-static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_list *args) {
+static void binary_str_sprint(DynamicMessage *message, const char *format, va_list *args) {
     int idx = 0;
     while (format[idx] != '\0') {
         // Not a format.
@@ -270,34 +270,9 @@ static void bin_str_vsprintf(DynamicMessage *message, const char *format, va_lis
             continue;
         }
         idx++;
-        switch (format[idx]) {
-        case 'l':
-            if (format[idx + 1] == 'l') {
-                idx++; // Handle lld, lli, and llu.
-            }
-            if (format[idx + 1] == 'd' || format[idx + 1] == 'i') {
-                idx += 2;
-                snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_FMT, va_arg(*args, LukipInt));
-                append_message_string(message, buffer);
-            } else if (format[idx + 1] == 'u') {
-                idx += 2;
-                snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_FMT, va_arg(*args, LukipUnsigned));
-                append_message_string(message, buffer);
-            }
-            break;
-        case 'd':
+        if (format[idx] == 'b') {
             idx++;
-            snprintf(buffer, BUFFER_LENGTH, LUKIP_INT_FMT, va_arg(*args, LukipInt));
-            append_message_string(message, buffer);
-            break;
-        case 'u':
-            idx++;
-            snprintf(buffer, BUFFER_LENGTH, LUKIP_UINT_FMT, va_arg(*args, LukipUnsigned));
-            append_message_string(message, buffer);
-            break;
-        case 'b':
-            idx++;
-            sprint_int_as_bin(buffer, va_arg(*args, LukipInt));
+            append_int_as_binary(buffer, va_arg(*args, LukipInt));
             append_message_string(message, buffer);
             break;
         }
@@ -335,7 +310,7 @@ void verify_binary(const bool condition, const LineInfo info, const char *format
     DynamicMessage message;
     init_message(&message);
 
-    bin_str_vsprintf(&message, format, &args);
+    binary_str_sprint(&message, format, &args);
     assert_failure(info, message.data);
     va_end(args);
 }
