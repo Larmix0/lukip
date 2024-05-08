@@ -16,17 +16,32 @@
 
 // ================================= GENERAL ===================================
 
-/** Must be called first before other Lukip macros. */
+/** Must be called first before other Lukip macros to initialize the framework. */
 #define LUKIP_INIT() (init_lukip())
 
-/** Declares a function that acts like a test case (and should be later ran). */
+/** Declares a test case function (should be run later). */
 #define TEST_CASE(name) void name()
 
-/** Same as TEST_CASE, but ensures the function is only visible in current translation unit. */
+/** Declares a test function to be run later. Only visible in the current translation unit. */
 #define PRIVATE_TEST_CASE(name) static TEST_CASE(name)
 
-/** Currently same as TEST_CASE, but it's made for fixtures in case the implementation changes. */
-#define TEST_FIXTURE(name) void name()
+/** Declares a function that is to be used as a setup. */
+#define DECLARE_SETUP(name) void name()
+
+/** 
+ * Declares a function that is to be used as a setup.
+ * Also, it's only visible in the current translation unit.
+ */
+#define PRIVATE_DECLARE_SETUP(name) static DECLARE_SETUP(name);
+
+/** Declares a function that is to be used as a teardown. */
+#define DECLARE_TEARDOWN(name) void name()
+
+/** 
+ * Declares a function that is to be used as a teardown.
+ * Also, it's only visible in the current translation unit.
+ */
+#define PRIVATE_DECLARE_TEARDOWN(name) static DECLARE_TEARDOWN(name);
 
 /**
  * @brief Makes a new setup.
@@ -47,7 +62,7 @@
 #define MAKE_TEARDOWN(teardownFunc) (lkp_make_teardown(teardownFunc))
 
 /** Makes both a new setup and teardown at once. */
-#define MAKE_TEST_FIXTURE(setupFunc, teardownFunc) (lkp_make_fixture(setupFunc, teardownFunc))
+#define MAKE_FIXTURE(setupFunc, teardownFunc) (lkp_make_fixture(setupFunc, teardownFunc))
 
 /** Makes setup nothing. */
 #define RESET_SETUP() (lkp_make_setup(NULL))
@@ -56,7 +71,7 @@
 #define RESET_TEARDOWN() (lkp_make_teardown(NULL))
 
 /** Makes both setup and teardown nothing. */
-#define RESET_TEST_FIXTURE() (lkp_make_fixture(NULL, NULL))
+#define RESET_FIXTURE() (lkp_make_fixture(NULL, NULL))
 
 /**
  * @brief Tests the passed function

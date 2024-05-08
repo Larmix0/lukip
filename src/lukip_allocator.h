@@ -1,6 +1,13 @@
 #ifndef LUKIP_ALLOCATOR_H
 #define LUKIP_ALLOCATOR_H
 
+/**
+ * @file lukip_allocator.h
+ * @brief Header for functions that allocate memory (they handle NULL returns too).
+ * 
+ * @author Larmix
+ */
+
 #include "stdlib.h"
 
 /**

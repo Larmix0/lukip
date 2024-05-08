@@ -3,8 +3,8 @@
 
 #include "lukip.h"
 
-TEST_FIXTURE(set_up2);
-TEST_FIXTURE(tear_down2);
+DECLARE_SETUP(set_up2);
+DECLARE_TEARDOWN(tear_down2);
 TEST_CASE(string_test2);
 
 #endif

@@ -2,7 +2,7 @@
 #define LUKIP_ASSERT_H
 
 /**
- * @file lukip_asserts.h
+ * @file lukip_assert.h
  * @brief Header for Lukip functionality and asserts implementation.
  * 
  * @author Larmix

@@ -5,11 +5,11 @@
 #include "lukip.h"
 #include "included_tests.h"
 
-TEST_FIXTURE(temp_set_up) {
+DECLARE_SETUP(temp_set_up) {
     printf("Set Up activated!\n");
 }
 
-TEST_FIXTURE(temp_tear_down) {
+DECLARE_TEARDOWN(temp_tear_down) {
     printf("Tear Down called!\n");
 }
 

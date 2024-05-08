@@ -1,5 +1,5 @@
 # Lukip
-A small unit-testing framework I made in C.
+A small unit-testing framework for C.
 
 ## What the project's about
 It's for testing C applications conveniently by just compiling an archive (.a) file with your other test files.
@@ -7,7 +7,7 @@ It also works on Linux and Windows (at least as far as my testing on my Windows 
 
 ## Building
 Clone in the directory you want it on with:
- ``` sh
+```sh
 git clone https://github.com/Larmix0/lukip.git
 ```
 
@@ -43,12 +43,12 @@ use `make clean` to remove all object/binary/archive files generated.
 
 int globalNumber = 0;
 
-TEST_FIXTURE(setup_example) {
+DECLARE_SETUP(setup_example) {
     globalNumber += 2;
     printf("Set up called, globalNumber: %d\n", globalNumber);
 }
 
-TEST_FIXTURE(teardown_example) {
+DECLARE_TEARDOWN(teardown_example) {
     globalNumber--;
     printf("Tear down called, globalNumber: %d\n", globalNumber);
 }
@@ -72,8 +72,7 @@ TEST_CASE(successful_test) {
 
 int main() {
     LUKIP_INIT();
-    MAKE_TEST_FIXTURE(setup_example, teardown_example);
-
+    MAKE_FIXTURE(setup_example, teardown_example);
     TEST(successful_test);
     TEST(failed_test); // Fails because of this.
     TEST(empty_test);
@@ -83,7 +82,7 @@ int main() {
 #### The output of the failed program looks like the following:
 ![fail case](assets/fail_screenshot.png)
 
-#### If we remove/comment the third line of main `TEST(failed_test);` then the successful output looks like the following:
+#### If we remove/comment the fourth line of main `TEST(failed_test);` then the successful output looks like the following:
 ![success case](assets/success_screenshot.png)
 
 ## Available assertions and their supported operands

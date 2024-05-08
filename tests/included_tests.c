@@ -5,11 +5,11 @@
 
 int globalNum = 0;
 
-TEST_FIXTURE(set_up2) {
+DECLARE_SETUP(set_up2) {
     globalNum += 2;
 }
 
-TEST_FIXTURE(tear_down2) {
+DECLARE_TEARDOWN(tear_down2) {
     globalNum -= 1;
 }
 

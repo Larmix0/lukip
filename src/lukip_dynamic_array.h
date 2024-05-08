@@ -1,6 +1,13 @@
 #ifndef LUKIP_DYNAMIC_ARRAY_H
 #define LUKIP_DYNAMIC_ARRAY_H
 
+/**
+ * @file lukip_dynamic_array.h
+ * @brief Header for dynamic arrays implementation in Lukip.
+ * 
+ * @author Larmix
+ */
+
 #include "lukip_allocator.h"
 
 /** Declares the struct of a dynamic array typedef'd with name and an array/pointer of type. */
