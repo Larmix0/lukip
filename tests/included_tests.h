@@ -1,5 +1,5 @@
-#ifndef INCLUDED_TESTS_H
-#define INCLUDED_TESTS_H
+#ifndef LUKIP_INCLUDED_TESTS_H
+#define LUKIP_INCLUDED_TESTS_H
 
 #include "lukip.h"
 

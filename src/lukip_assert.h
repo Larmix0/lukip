@@ -1,5 +1,5 @@
-#ifndef LUKIP_ASSERTS_H
-#define LUKIP_ASSERTS_H
+#ifndef LUKIP_ASSERT_H
+#define LUKIP_ASSERT_H
 
 /**
  * @file lukip_asserts.h
@@ -18,48 +18,48 @@
 #include <time.h>
 
 #include "lukip.h"
-#include "dynamic_array.h"
+#include "lukip_dynamic_array.h"
 
 /** Pastes all information before function call (file name, function name, and line.). */
-#define LINE_INFO \
-    (LineInfo){ \
-        (FuncInfo){.status = UNKNOWN, .fileName = __FILE__, .funcName = (char *)__func__}, \
+#define LKP_LINE_INFO \
+    (LkpLineInfo){ \
+        (LkpFuncInfo){.status = UNKNOWN, .fileName = __FILE__, .funcName = (char *)__func__}, \
         .line = __LINE__, \
     }
 
-#define LUKIP_INT_FMT "%" PRId64 /** Lukip integer format for strings. */
-#define LUKIP_UINT_FMT "%" PRIu64 /** Lukip unsigned integer format for strings. */
-#define LUKIP_FLOAT_FMT "%lf" /** Lukip float format for strings. */
+#define LKP_INT_FMT "%" PRId64 /** Lukip integer format for strings. */
+#define LKP_UINT_FMT "%" PRIu64 /** Lukip unsigned integer format for strings. */
+#define LKP_FLOAT_FMT "%lf" /** Lukip float format for strings. */
 
 /** Integer assumed to be compatible with what the user passes. */
-typedef int64_t LukipInt;
+typedef int64_t LkpInt;
 
 /** Unsigned integer assumed to be compatible with what the user passes. */
-typedef uint64_t LukipUnsigned;
+typedef uint64_t LkpUnsigned;
 
 /** Float assumed to be compatible with what the user passes. */
-typedef double LukipFloat;
+typedef double LkpFloat;
 
 /** Pointer to function with no parameters or return value. */
-typedef void (*EmptyFunc)();
+typedef void (*LkpEmptyFunc)();
 
 /** An enum to differentiate between equal and unequal without an ambiguous bool. */
 typedef enum {
     ASSERT_EQUAL,
     ASSERT_NOT_EQUAL
-} AssertOp;
+} LkpAssertOp;
 
 typedef enum {
     RAISE_WARN,
     RAISE_FAIL
-} RaiseType;
+} LkpRaiseType;
 
 /** The current status of a given test. */
 typedef enum {
     UNKNOWN,
     SUCCESS,
     FAILURE
-} TestStatus;
+} LkpTestStatus;
 
 /**
  * @brief Information of a test function.
@@ -70,52 +70,52 @@ typedef enum {
  * the function they were called on.
  */
 typedef struct {
-    TestStatus status;
+    LkpTestStatus status;
     const char *fileName;
     const char *funcName;
-} FuncInfo;
+} LkpFuncInfo;
 
 /** Has a test function's information + a line where a macro was called. */
 typedef struct {
-    FuncInfo testInfo;
+    LkpFuncInfo testInfo;
     int line;
-} LineInfo;
+} LkpLineInfo;
 
 /** Stores a failed assert's message and line where it was called. */
 typedef struct {
     char *message;
     int line;
-} Failure;
+} LkpFailure;
 
 /** Array of failure asserts in test functions. */
-DECLARE_DA_STRUCT(FailureArray, Failure);
+LKP_DECLARE_DA_STRUCT(LkpFailureArray, LkpFailure);
 
 typedef struct {
     char *message;
-    LineInfo location;
-} Warning;
+    LkpLineInfo location;
+} LkpWarning;
 
 /** Array of warnings during testing. */
-DECLARE_DA_STRUCT(WarningArray, Warning);
+LKP_DECLARE_DA_STRUCT(WarningArray, LkpWarning);
 
 /** Information of a function used for testing as a whole. */
 typedef struct {
-    FailureArray failures;
-    LineInfo caller;
-    FuncInfo info;
-    EmptyFunc testFunc;
-} TestFunc;
+    LkpFailureArray failures;
+    LkpLineInfo caller;
+    LkpFuncInfo info;
+    LkpEmptyFunc testFunc;
+} LkpTestFunc;
 
 /** An array of tested functions. */
-DECLARE_DA_STRUCT(TestFuncArray, TestFunc);
+LKP_DECLARE_DA_STRUCT(LkpTestFuncArray, LkpTestFunc);
 
 /** The main struct which stores the fields used for unit-testing. */
 typedef struct {
-    TestFuncArray tests;
+    LkpTestFuncArray tests;
     WarningArray warnings;
 
-    EmptyFunc setup;
-    EmptyFunc teardown;
+    LkpEmptyFunc setup;
+    LkpEmptyFunc teardown;
     clock_t startTime;
     int asserts;
     int failedAsserts;
@@ -136,16 +136,16 @@ void end_lukip();
  * 
  * @return The allocated string.
  */
-char *strf_alloc(const char *format, ...);
+char *lkp_strf_alloc(const char *format, ...);
 
 /** Makes both a new setup and a new teardown. */
-void make_test_fixture(const EmptyFunc newSetup, const EmptyFunc newTeardown);
+void lkp_make_fixture(const LkpEmptyFunc newSetup, const LkpEmptyFunc newTeardown);
 
 /** Calls passed setup function before every test. */
-void make_setup(const EmptyFunc newSetup);
+void lkp_make_setup(const LkpEmptyFunc newSetup);
 
 /** Calls passed teardown function after every test. */
-void make_teardown(const EmptyFunc newTeardown);
+void lkp_make_teardown(const LkpEmptyFunc newTeardown);
 
 /**
  * @brief Performs a unit test on a function.
@@ -153,7 +153,7 @@ void make_teardown(const EmptyFunc newTeardown);
  * @param funcToTest The function to be tested.
  * @param caller Information about the place where the TEST() call was made.
  */
-void test_func(const EmptyFunc funcToTest, const LineInfo caller);
+void lkp_test_func(const LkpEmptyFunc funcToTest, const LkpLineInfo caller);
 
 /**
  * @brief Verifies that a condition is true.
@@ -163,7 +163,7 @@ void test_func(const EmptyFunc funcToTest, const LineInfo caller);
  * @param format The formatted error message in the case of failing.
  * @param ... Arguments for the format.
  */
-void verify_condition(const bool condition, const LineInfo info, const char *format, ...);
+void lkp_verify_condition(const bool condition, const LkpLineInfo info, const char *format, ...);
 
 /**
  * @brief Verify a condition and allow %b to format ints as a binary string.
@@ -173,7 +173,7 @@ void verify_condition(const bool condition, const LineInfo info, const char *for
  * @param format The formatted error message in the case of failing.
  * @param ... Arguments for the format.
  */
-void verify_binary(const bool condition, const LineInfo info, const char *format, ...);
+void lkp_verify_binary(const bool condition, const LkpLineInfo info, const char *format, ...);
 
 /**
  * @brief Checks if 2 strings evaluate to a passed condition.
@@ -183,8 +183,8 @@ void verify_binary(const bool condition, const LineInfo info, const char *format
  * @param info The line information of the assert.
  * @param op The operation to be done on the strings.
  */
-void verify_strings(
-    const char *string1, const char *string2, const LineInfo info, const AssertOp op
+void lkp_verify_strings(
+    const char *string1, const char *string2, const LkpLineInfo info, const LkpAssertOp op
 );
 
 /**
@@ -196,9 +196,9 @@ void verify_strings(
  * @param info The line information of the assert.
  * @param op The operation to be done on the strings.
  */
-void verify_bytes_array(
+void lkp_verify_bytes_array(
     const void *array1, const void *array2, const int length,
-    const LineInfo info, const AssertOp op
+    const LkpLineInfo info, const LkpAssertOp op
 );
 
 /**
@@ -210,9 +210,9 @@ void verify_bytes_array(
  * @param info The line information of the assert.
  * @param op The operation to be done on the floats
  */
-void verify_precision(
-    const LukipFloat float1, const LukipFloat float2, const int digitPrecision,
-    const LineInfo info, const AssertOp op
+void lkp_verify_precision(
+    const LkpFloat float1, const LkpFloat float2, const int digitPrecision,
+    const LkpLineInfo info, const LkpAssertOp op
 );
 
 /**
@@ -223,6 +223,6 @@ void verify_precision(
  * @param format The formatted message to be written in the raise.
  * @param ... Arguments for the format.
  */
-void raise_assert(const RaiseType type, const LineInfo info, const char *format, ...);
+void lkp_raise_assert(const LkpRaiseType type, const LkpLineInfo info, const char *format, ...);
 
 #endif

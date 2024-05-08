@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "allocator.h"
+#include "lukip_allocator.h"
 
 /**
  * @brief Allocates from the heap and checks for NULL itself. 
@@ -10,7 +10,7 @@
  * 
  * @return Allocated pointer.
  */
-void *allocate(const int size, const size_t elementSize) {
+void *lkp_allocate(const int size, const size_t elementSize) {
     void *result = malloc(size * elementSize);
     if (result == NULL) {
         printf("Lukip failed to allocate memory.");
@@ -28,7 +28,7 @@ void *allocate(const int size, const size_t elementSize) {
  * 
  * @return The new reallocated pointer.
  */
-void *reallocate(void *pointer, const int newSize, const size_t elementSize) {
+void *lkp_reallocate(void *pointer, const int newSize, const size_t elementSize) {
     void *result = realloc(pointer, newSize * elementSize);
     if (result == NULL) {
         printf("Lukip failed to reallocate a block of memory.");

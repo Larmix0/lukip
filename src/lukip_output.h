@@ -8,13 +8,13 @@
  * @author Larmix
  */
 
-#include "lukip_asserts.h"
+#include "lukip_assert.h"
 
 /**
  * @brief Show results of a Lukip unit program.
  * 
  * @param lukip The lukip unit to show the results of.
  */
-void show_results(const LukipUnit *lukip);
+void lkp_show_results(const LukipUnit *lukip);
 
 #endif

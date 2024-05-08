@@ -1,3 +1,6 @@
+#ifndef LUKIP_ALLOCATOR_H
+#define LUKIP_ALLOCATOR_H
+
 #include "stdlib.h"
 
 /**
@@ -8,7 +11,7 @@
  * 
  * @return Allocated pointer.
  */
-void *allocate(const int size, const size_t elementSize);
+void *lkp_allocate(const int size, const size_t elementSize);
 
 /**
  * @brief Reallocates a certain heap pointer and checks for NULL itself.
@@ -19,4 +22,6 @@ void *allocate(const int size, const size_t elementSize);
  * 
  * @return The new reallocated pointer.
  */
-void *reallocate(void *pointer, const int newSize, const size_t elementSize);
+void *lkp_reallocate(void *pointer, const int newSize, const size_t elementSize);
+
+#endif

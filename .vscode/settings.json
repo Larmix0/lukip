@@ -2,6 +2,10 @@
     "files.associations": {
         "stdint.h": "c",
         "lukip_output.h": "c",
-        "lukip.h": "c"
+        "lukip.h": "c",
+        "allocator.h": "c",
+        "stdlib.h": "c",
+        "lukip_allocator.h": "c",
+        "lukip_assert.h": "c"
     }
 }

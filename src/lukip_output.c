@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-#include "lukip_asserts.h"
+#include "lukip_assert.h"
 
 #define LONG_LINE_LENGTH 100 /** Amount of characters placed to separate output. */
 
@@ -76,7 +76,7 @@ static void show_warnings(const LukipUnit *lukip) {
             continue; // No need to warn.
         }
         hadWarnings = true;
-        const LineInfo *caller = &lukip->tests.data[i].caller;
+        const LkpLineInfo *caller = &lukip->tests.data[i].caller;
         print_warning(
             "Function called in line %d, %s|%s() had no assertions.\n",
             caller->line, caller->testInfo.fileName, caller->testInfo.funcName
@@ -87,7 +87,7 @@ static void show_warnings(const LukipUnit *lukip) {
         hadWarnings = true;
     }
     for (int i = 0; i < lukip->warnings.length; i++) {
-        Warning warning = lukip->warnings.data[i];
+        LkpWarning warning = lukip->warnings.data[i];
         print_warning(
             "Line %d: %s|%s(): %s\n",
             warning.location.line, warning.location.testInfo.fileName,
@@ -106,12 +106,12 @@ static void show_warnings(const LukipUnit *lukip) {
  */
 static void errors_info(const LukipUnit *lukip) {
     for (int i = 0; i < lukip->tests.length; i++) {
-        const TestFunc *test = &lukip->tests.data[i];
+        const LkpTestFunc *test = &lukip->tests.data[i];
         if (test->info.status != FAILURE) {
             continue;
         }
         for (int j = 0; j < test->failures.length; j++) {
-            Failure failure = test->failures.data[j];
+            LkpFailure failure = test->failures.data[j];
             printf("[" RED "FAIL" DEFAULT "] ");
             printf(
                 "Line %d: %s|%s(): %s\n",
@@ -151,7 +151,7 @@ static void show_fail(const LukipUnit *lukip, const double executionTime) {
         lukip->tests.length - failures, lukip->tests.length,
         lukip->asserts - lukip->failedAsserts, lukip->asserts, executionTime
     );
-    char *failMessage = strf_alloc("Failed in %.3lfs.", executionTime);
+    char *failMessage = lkp_strf_alloc("Failed in %.3lfs.", executionTime);
     long_line_message('=', failMessage, RED);
     free(failMessage);
 }
@@ -179,7 +179,7 @@ static void show_success(const LukipUnit *lukip, const double executionTime) {
     );
     printf("OK.\n\n");
 
-    char *successMessage = strf_alloc("Succeeded in %.3lfs.", executionTime);
+    char *successMessage = lkp_strf_alloc("Succeeded in %.3lfs.", executionTime);
     long_line_message('=', successMessage, GREEN);
     free(successMessage);
 }
@@ -188,7 +188,7 @@ static void show_success(const LukipUnit *lukip, const double executionTime) {
  * Print some newlines, and a long line of dashes to seperate results from
  * the rest of the terminal. Show warnings and then the results after.
  */
-void show_results(const LukipUnit *lukip) {
+void lkp_show_results(const LukipUnit *lukip) {
     printf("\n\n\n");
     long_line('-');
     show_warnings(lukip);
