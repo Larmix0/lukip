@@ -32,7 +32,7 @@
  * Declares a function that is to be used as a setup.
  * Also, it's only visible in the current translation unit.
  */
-#define PRIVATE_DECLARE_SETUP(name) static DECLARE_SETUP(name);
+#define PRIVATE_DECLARE_SETUP(name) static DECLARE_SETUP(name)
 
 /** Declares a function that is to be used as a teardown. */
 #define DECLARE_TEARDOWN(name) void name()
@@ -41,7 +41,7 @@
  * Declares a function that is to be used as a teardown.
  * Also, it's only visible in the current translation unit.
  */
-#define PRIVATE_DECLARE_TEARDOWN(name) static DECLARE_TEARDOWN(name);
+#define PRIVATE_DECLARE_TEARDOWN(name) static DECLARE_TEARDOWN(name)
 
 /**
  * @brief Makes a new setup.
