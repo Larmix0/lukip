@@ -190,7 +190,7 @@ static void show_success(const LukipUnit *lukip, const double executionTime) {
  */
 void lkp_show_results(const LukipUnit *lukip) {
     printf("\n\n\n");
-    long_line('-');
+    long_line('=');
     show_warnings(lukip);
 
     const clock_t endTime = clock();
