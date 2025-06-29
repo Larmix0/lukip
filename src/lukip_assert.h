@@ -23,7 +23,7 @@
 /** Pastes all information before function call (file name, function name, and line.). */
 #define LKP_LINE_INFO \
     (LkpLineInfo){ \
-        (LkpFuncInfo){.status = UNKNOWN, .fileName = __FILE__, .funcName = (char *)__func__}, \
+        (LkpFuncInfo){.status = LKP_TEST_UNKNOWN, .fileName = __FILE__, .funcName = (char *)__func__}, \
         .line = __LINE__, \
     }
 
@@ -45,20 +45,20 @@ typedef void (*LkpEmptyFunc)();
 
 /** An enum to differentiate between equal and unequal without an ambiguous bool. */
 typedef enum {
-    ASSERT_EQUAL,
-    ASSERT_NOT_EQUAL
+    LKP_ASSERT_EQUAL,
+    LKP_ASSERT_NOT_EQUAL
 } LkpAssertOp;
 
 typedef enum {
-    RAISE_WARN,
-    RAISE_FAIL
+    LKP_RAISE_WARN,
+    LKP_RAISE_FAIL
 } LkpRaiseType;
 
 /** The current status of a given test. */
 typedef enum {
-    UNKNOWN,
-    SUCCESS,
-    FAILURE
+    LKP_TEST_UNKNOWN,
+    LKP_TEST_SUCCESS,
+    LKP_TEST_FAILURE
 } LkpTestStatus;
 
 /**

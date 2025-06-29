@@ -72,7 +72,7 @@ static void print_warning(const char *format, ...) {
 static void show_warnings(const LukipUnit *lukip) {
     bool hadWarnings = false;
     for (int i = 0; i < lukip->tests.length; i++) {
-        if (lukip->tests.data[i].info.status != UNKNOWN) {
+        if (lukip->tests.data[i].info.status != LKP_TEST_UNKNOWN) {
             continue; // No need to warn.
         }
         hadWarnings = true;
@@ -107,7 +107,7 @@ static void show_warnings(const LukipUnit *lukip) {
 static void errors_info(const LukipUnit *lukip) {
     for (int i = 0; i < lukip->tests.length; i++) {
         const LkpTestFunc *test = &lukip->tests.data[i];
-        if (test->info.status != FAILURE) {
+        if (test->info.status != LKP_TEST_FAILURE) {
             continue;
         }
         for (int j = 0; j < test->failures.length; j++) {
@@ -133,10 +133,10 @@ static void errors_info(const LukipUnit *lukip) {
 static void show_fail(const LukipUnit *lukip, const double executionTime) {
     int failures = 0;
     for (int i = 0; i < lukip->tests.length; i++) {
-        if (lukip->tests.data[i].info.status == FAILURE) {
+        if (lukip->tests.data[i].info.status == LKP_TEST_FAILURE) {
             putchar('F');
             failures++;
-        } else if (lukip->tests.data[i].info.status == SUCCESS) {
+        } else if (lukip->tests.data[i].info.status == LKP_TEST_SUCCESS) {
             putchar('.');
         } else {
             putchar('?');
@@ -168,7 +168,7 @@ static void show_fail(const LukipUnit *lukip, const double executionTime) {
  */
 static void show_success(const LukipUnit *lukip, const double executionTime) {
     for (int i = 0; i < lukip->tests.length; i++) {
-        lukip->tests.data[i].info.status == SUCCESS ? putchar('.') : putchar('?');
+        lukip->tests.data[i].info.status == LKP_TEST_SUCCESS ? putchar('.') : putchar('?');
     }
     putchar('\n');
     long_line('=');

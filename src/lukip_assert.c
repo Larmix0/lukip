@@ -49,7 +49,7 @@ void end_lukip() {
     LKP_FREE_DA(&lukip.warnings);
 
     for (int i = 0; i < lukip.tests.length; i++) {
-        if (lukip.tests.data[i].info.status == FAILURE) {
+        if (lukip.tests.data[i].info.status == LKP_TEST_FAILURE) {
             free_failure_messages(&lukip.tests.data[i]);
             LKP_FREE_DA(&lukip.tests.data[i].failures);
         }
@@ -76,7 +76,7 @@ void init_lukip() {
 
 /** Initializes a LkpFuncInfo struct. */
 static void init_func_info(LkpFuncInfo *info) {
-    info->status = UNKNOWN;
+    info->status = LKP_TEST_UNKNOWN;
     info->fileName = NULL;
     info->funcName = NULL;
 }
@@ -172,10 +172,10 @@ static void assert_success(const LkpFuncInfo newInfo) {
     lukip.asserts++;
 
     LkpFuncInfo *info = &lukip.tests.data[lukip.tests.length - 1].info;
-    if (info->status == UNKNOWN) {
+    if (info->status == LKP_TEST_UNKNOWN) {
         info->fileName = newInfo.fileName;
         info->funcName = newInfo.funcName;
-        info->status = SUCCESS;
+        info->status = LKP_TEST_SUCCESS;
     }
 }
 
@@ -185,12 +185,12 @@ static void assert_failure(const LkpLineInfo newInfo, char *message) {
     lukip.failedAsserts++;
 
     LkpFuncInfo *info = &lukip.tests.data[lukip.tests.length - 1].info;
-    if (info->status == UNKNOWN) {
+    if (info->status == LKP_TEST_UNKNOWN) {
         info->fileName = newInfo.testInfo.fileName;
         info->funcName = newInfo.testInfo.funcName;
     }
     lukip.hasFailed = true;
-    info->status = FAILURE;
+    info->status = LKP_TEST_FAILURE;
     LkpFailure failure = {.line=newInfo.line, .message=message};
     LKP_APPEND_DA(&lukip.tests.data[lukip.tests.length - 1].failures, failure);
 }
@@ -375,9 +375,9 @@ static void assert_strings_not_equal(
 void lkp_verify_strings(
     const char *string1, const char *string2, const LkpLineInfo info, const LkpAssertOp op
 ) {
-    if (op == ASSERT_EQUAL) {
+    if (op == LKP_ASSERT_EQUAL) {
         assert_strings_equal(string1, string2, info);
-    } else if (op == ASSERT_NOT_EQUAL) {
+    } else if (op == LKP_ASSERT_NOT_EQUAL) {
         assert_strings_not_equal(string1, string2, info);
     }
 }
@@ -441,9 +441,9 @@ void lkp_verify_bytes_array(
     const void *array1, const void *array2, const int length,
     const LkpLineInfo info, const LkpAssertOp op
 ) {
-    if (op == ASSERT_EQUAL) {
+    if (op == LKP_ASSERT_EQUAL) {
         assert_bytes_equal(array1, array2, length, info);
-    } else if (op == ASSERT_NOT_EQUAL) {
+    } else if (op == LKP_ASSERT_NOT_EQUAL) {
         assert_bytes_not_equal(array1, array2, length, info);
     }
 }
@@ -470,13 +470,13 @@ void lkp_verify_precision(
     }
     const bool withinPrecision = realDifference <= acceptableDifference ? true : false;
 
-    if (op == ASSERT_EQUAL) {
+    if (op == LKP_ASSERT_EQUAL) {
         lkp_verify_condition(
             withinPrecision, info,
             LKP_FLOAT_FMT " Does not equal " LKP_FLOAT_FMT " within %d places.",
             float1, float2, digitPrecision
         );
-    } else if (op == ASSERT_NOT_EQUAL) {
+    } else if (op == LKP_ASSERT_NOT_EQUAL) {
         lkp_verify_condition(
             !withinPrecision, info, 
             LKP_FLOAT_FMT " Is not different from " LKP_FLOAT_FMT " within %d places.",
@@ -491,9 +491,9 @@ void lkp_raise_assert(const LkpRaiseType type, const LkpLineInfo info, const cha
     va_start(args, format);
     char *message = lkp_vstrf_alloc(format, &args);
 
-    if (type == RAISE_FAIL) {
+    if (type == LKP_RAISE_FAIL) {
         assert_failure(info, message);
-    } else if (type == RAISE_WARN) {
+    } else if (type == LKP_RAISE_WARN) {
         LkpWarning warning = {.location=info, .message=message};
         LKP_APPEND_DA(&lukip.warnings, warning);
     }

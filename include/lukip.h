@@ -779,7 +779,7 @@
 // ======================= TRUE (without comparisons) ==============================================
 
 #define ASSERT_WITHIN_EQUAL(val1, val2, precision) \
-    (lkp_verify_precision(val1, val2, precision, LKP_LINE_INFO, ASSERT_EQUAL))
+    (lkp_verify_precision(val1, val2, precision, LKP_LINE_INFO, LKP_ASSERT_EQUAL))
 
 #define ASSERT_CHAR_EQUAL(val1, val2) \
     (lkp_verify_condition( \
@@ -798,10 +798,10 @@
     (lkp_verify_condition((val1) == (val2), LKP_LINE_INFO, "%p Does not equal %p.", (val1), (val2)))
 
 #define ASSERT_BYTES_EQUAL(val1, val2, length) \
-    (lkp_verify_bytes_array(val1, val2, length, LKP_LINE_INFO, ASSERT_EQUAL))
+    (lkp_verify_bytes_array(val1, val2, length, LKP_LINE_INFO, LKP_ASSERT_EQUAL))
 
 #define ASSERT_STRING_EQUAL(val1, val2) \
-    (lkp_verify_strings(val1, val2, LKP_LINE_INFO, ASSERT_EQUAL))
+    (lkp_verify_strings(val1, val2, LKP_LINE_INFO, LKP_ASSERT_EQUAL))
 
 #define ASSERT_NULL(val) \
     (lkp_verify_condition((val) == NULL, LKP_LINE_INFO, "%p Does not equal NULL.", (val)))
@@ -809,7 +809,7 @@
 // ======================= FALSE (without comparisons) =============================================
 
 #define ASSERT_WITHIN_NOT_EQUAL(val1, val2, precision) \
-    (lkp_verify_precision(val1, val2, precision, LKP_LINE_INFO, ASSERT_NOT_EQUAL))
+    (lkp_verify_precision(val1, val2, precision, LKP_LINE_INFO, LKP_ASSERT_NOT_EQUAL))
 
 #define ASSERT_CHAR_NOT_EQUAL(val1, val2) \
     (lkp_verify_condition( \
@@ -830,10 +830,10 @@
     ))
 
 #define ASSERT_BYTES_NOT_EQUAL(val1, val2, length) \
-    (lkp_verify_bytes_array(val1, val2, length, LKP_LINE_INFO, ASSERT_NOT_EQUAL))
+    (lkp_verify_bytes_array(val1, val2, length, LKP_LINE_INFO, LKP_ASSERT_NOT_EQUAL))
 
 #define ASSERT_STRING_NOT_EQUAL(val1, val2) \
-    (lkp_verify_strings(val1, val2, LKP_LINE_INFO, ASSERT_NOT_EQUAL))
+    (lkp_verify_strings(val1, val2, LKP_LINE_INFO, LKP_ASSERT_NOT_EQUAL))
 
 #define ASSERT_NOT_NULL(val) \
     (lkp_verify_condition((val) != NULL, LKP_LINE_INFO, "%p Is not different from NULL.", (val)))
