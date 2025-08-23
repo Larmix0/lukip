@@ -840,13 +840,17 @@
 
 // =================================== RAISE =======================================================
 
-#define ASSERT_RAISE_FAIL() (lkp_raise_assert(RAISE_FAIL, LKP_LINE_INFO, "Failure raised."))
+#define ASSERT_RAISE_FAIL() \
+    (lkp_raise_assert(LKP_RAISE_FAIL, LKP_LINE_INFO, "Failure raised."))
 
-#define ASSERT_RAISE_FAIL_MESSAGE(...) (lkp_raise_assert(RAISE_FAIL, LKP_LINE_INFO, __VA_ARGS__))
+#define ASSERT_RAISE_FAIL_MESSAGE(...) \
+    (lkp_raise_assert(LKP_RAISE_FAIL, LKP_LINE_INFO, __VA_ARGS__))
 
-#define ASSERT_RAISE_WARN() (lkp_raise_assert(RAISE_WARN, LKP_LINE_INFO, "Warning raised."))
+#define ASSERT_RAISE_WARN() \
+    (lkp_raise_assert(LKP_RAISE_WARN, LKP_LINE_INFO, "Warning raised."))
 
-#define ASSERT_RAISE_WARN_MESSAGE(...) (lkp_raise_assert(RAISE_WARN, LKP_LINE_INFO, __VA_ARGS__))
+#define ASSERT_RAISE_WARN_MESSAGE(...) \
+    (lkp_raise_assert(LKP_RAISE_WARN, LKP_LINE_INFO, __VA_ARGS__))
 
 // =============================== MISCELLANEOUS ===================================================
 
