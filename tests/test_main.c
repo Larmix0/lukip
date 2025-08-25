@@ -1,5 +1,5 @@
 /**
- * @file test_lukip.c
+ * @file test_main.c
  * @brief Main file for testing Lukip's functionality.
  * 
  * @author Larmix
