@@ -82,6 +82,13 @@
  */
 #define TEST(funcToTest) (lkp_test_func(funcToTest, LKP_LINE_INFO))
 
+/** 
+ * Returns the current status of a lukip program. 1 if a unit failed, 0 otherwise.
+ * 
+ * Warnings don't get counted as a failure.
+ */
+#define LUKIP_STATUS() (lkp_status())
+
 // ============================ NUMBER EQUAL =======================================================
 
 #define ASSERT_INT_EQUAL(val1, val2) \

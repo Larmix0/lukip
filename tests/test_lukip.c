@@ -5,12 +5,12 @@
 #include "lukip.h"
 #include "included_tests.h"
 
-DECLARE_SETUP(temp_set_up) {
-    printf("Set Up activated!\n");
+DECLARE_SETUP(temp_setup) {
+    printf("Setup activated.\n");
 }
 
-DECLARE_TEARDOWN(temp_tear_down) {
-    printf("Tear Down called!\n");
+DECLARE_TEARDOWN(temp_teardown) {
+    printf("Teardown called.\n");
 }
 
 TEST_CASE(empty_test) {
@@ -71,6 +71,8 @@ int main() {
     MAKE_SETUP(set_up2);
     MAKE_TEARDOWN(tear_down2);
 
+    printf("Status code: %d (expecting non-failure).\n", LUKIP_STATUS());
+
     TEST(string_test2);
     TEST(failed_test);
     TEST(raise_test);
@@ -88,5 +90,6 @@ int main() {
     TEST(empty_test);
     TEST(string_test2);
 
+    printf("Status code: %d (expecting failure).\n", LUKIP_STATUS());
     return 0;
 }

@@ -14,7 +14,7 @@ DECLARE_TEARDOWN(tear_down2) {
 }
 
 TEST_CASE(string_test2) {
-    printf("Global num is: %d\n", globalNum);
+    printf("Global num is: %d.\n", globalNum);
     char str1[10] = "string!9", str2[10] = "string!";
     ASSERT_STRING_EQUAL(str1, str2);
 }

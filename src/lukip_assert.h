@@ -129,6 +129,13 @@ void init_lukip();
 void end_lukip();
 
 /** 
+ * Returns the current status code for lukip testing.
+ * 
+ * @return An integer which is 1 if a unit has failed, or 0 if none have failed so far.
+ */
+int lkp_status();
+
+/** 
  * @brief Allocates a formatted string.
  * 
  * @param format The formatted string.

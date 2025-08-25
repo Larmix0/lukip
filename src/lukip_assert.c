@@ -40,23 +40,6 @@ static void free_failure_messages(LkpTestFunc *failedFunc) {
     }
 }
 
-/** Ends the Lukip unit, which is by displaying the results and freeing resources. */
-void end_lukip() {
-    lkp_show_results(&lukip);
-    for (int i = 0; i < lukip.warnings.length; i++) {
-        free(lukip.warnings.data[i].message);
-    }
-    LKP_FREE_DA(&lukip.warnings);
-
-    for (int i = 0; i < lukip.tests.length; i++) {
-        if (lukip.tests.data[i].info.status == LKP_TEST_FAILURE) {
-            free_failure_messages(&lukip.tests.data[i]);
-            LKP_FREE_DA(&lukip.tests.data[i].failures);
-        }
-    }
-    LKP_FREE_DA(&lukip.tests);
-}
-
 /** Initializes the Lukip unit to start the program, and sets end_lukip to run at exit. */
 void init_lukip() {
     LKP_INIT_DA(&lukip.tests);
@@ -72,6 +55,23 @@ void init_lukip() {
         );
         exit(EXIT_FAILURE);
     }
+}
+
+/** Ends the Lukip unit, which is by displaying the results and freeing resources. */
+void end_lukip() {
+    lkp_show_results(&lukip);
+    for (int i = 0; i < lukip.warnings.length; i++) {
+        free(lukip.warnings.data[i].message);
+    }
+    LKP_FREE_DA(&lukip.warnings);
+
+    for (int i = 0; i < lukip.tests.length; i++) {
+        if (lukip.tests.data[i].info.status == LKP_TEST_FAILURE) {
+            free_failure_messages(&lukip.tests.data[i]);
+            LKP_FREE_DA(&lukip.tests.data[i].failures);
+        }
+    }
+    LKP_FREE_DA(&lukip.tests);
 }
 
 /** Initializes a LkpFuncInfo struct. */
@@ -93,6 +93,15 @@ static void init_test(LkpTestFunc *test) {
     test->testFunc = NULL;
     init_func_info(&test->info);
     init_line_info(&test->caller);
+}
+
+/** 
+ * Returns the current status code for lukip testing.
+ * 
+ * @return an integer which is 1 if a unit has failed, or 0 if none have failed so far.
+ */
+int lkp_status() {
+    return lukip.hasFailed ? 1 : 0;
 }
 
 /**
