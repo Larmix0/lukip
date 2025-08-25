@@ -1,12 +1,12 @@
-#ifndef LUKIP_H
-#define LUKIP_H
-
 /**
  * @file lukip.h
  * @brief Header for the Lukip unit testing framework for users.
  * 
  * @author Larmix
  */
+
+#ifndef LUKIP_H
+#define LUKIP_H
 
 #include <inttypes.h>
 #include <stdio.h>

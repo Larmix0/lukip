@@ -1,12 +1,12 @@
-#ifndef LUKIP_OUTPUT_H
-#define LUKIP_OUTPUT_H
-
 /**
  * @file lukip_asserts.h
  * @brief Header for displaying output of a Lukip unit-testing program.
  * 
  * @author Larmix
  */
+
+#ifndef LUKIP_OUTPUT_H
+#define LUKIP_OUTPUT_H
 
 #include "lukip_assert.h"
 

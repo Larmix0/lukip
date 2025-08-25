@@ -1,12 +1,12 @@
-#ifndef LUKIP_ASSERT_H
-#define LUKIP_ASSERT_H
-
 /**
  * @file lukip_assert.h
  * @brief Header for Lukip functionality and asserts implementation.
  * 
  * @author Larmix
  */
+
+#ifndef LUKIP_ASSERT_H
+#define LUKIP_ASSERT_H
 
 #include <inttypes.h>
 #include <stdarg.h>

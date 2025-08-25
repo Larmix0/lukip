@@ -1,12 +1,12 @@
-#ifndef LUKIP_DYNAMIC_ARRAY_H
-#define LUKIP_DYNAMIC_ARRAY_H
-
 /**
  * @file lukip_dynamic_array.h
  * @brief Header for dynamic arrays implementation in Lukip.
  * 
  * @author Larmix
  */
+
+#ifndef LUKIP_DYNAMIC_ARRAY_H
+#define LUKIP_DYNAMIC_ARRAY_H
 
 #include "lukip_allocator.h"
 

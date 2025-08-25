@@ -1,3 +1,10 @@
+/**
+ * @file lukip_allocator.c
+ * @brief Includes the code for functions used for memory allocation convenience.
+ * 
+ * @author Larmix
+ */
+
 #include <stdio.h>
 
 #include "lukip_allocator.h"

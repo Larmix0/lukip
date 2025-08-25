@@ -1,3 +1,10 @@
+/**
+ * @file test_lukip.c
+ * @brief Main file for testing Lukip's functionality.
+ * 
+ * @author Larmix
+ */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -5,18 +12,21 @@
 #include "lukip.h"
 #include "included_tests.h"
 
-DECLARE_SETUP(temp_setup) {
+/** General setup for the tests. */
+DECLARE_SETUP(test_setup) {
     printf("Setup activated.\n");
 }
 
-DECLARE_TEARDOWN(temp_teardown) {
+/** General teardown for the tests. */
+DECLARE_TEARDOWN(test_teardown) {
     printf("Teardown called.\n");
 }
 
+/** Just an empty tests to ensure we get warned for having no assertions. */
 TEST_CASE(empty_test) {
-    // To see if we get warned for no assertions.
 }
 
+/** A test which ends up with some different kinds of failures. */
 TEST_CASE(failed_test) {
     ASSERT_BOOL_EQUAL(true, false);
     int8_t five = 5;
@@ -33,6 +43,7 @@ TEST_CASE(failed_test) {
     ASSERT_CUSTOM(1 == 2, "Failed custom: %d == %d.", 1, 2);
 }
 
+/** A test with a variety of successful assertions. */
 TEST_CASE(successful_test) {
     ASSERT_BOOL_EQUAL(true, true);
     int8_t five = 5;
@@ -41,6 +52,7 @@ TEST_CASE(successful_test) {
     ASSERT_INT_EQUAL(2, 2);
 }
 
+/** A test for bytecode array assertions. */
 TEST_CASE(bytes_array_test) {
     uint8_t bytesArray1[13];
     uint8_t bytesArray2[13];
@@ -54,6 +66,7 @@ TEST_CASE(bytes_array_test) {
     ASSERT_BYTES_EQUAL(bytesArray1, bytesArray2, 12);
 }
 
+/** Tests that raising failures or warnings works properly (with custom and default messages). */
 TEST_CASE(raise_test) {
     ASSERT_RAISE_FAIL_MESSAGE("Fail raise test.");
     ASSERT_RAISE_FAIL();
@@ -61,11 +74,13 @@ TEST_CASE(raise_test) {
     ASSERT_RAISE_WARN();
 }
 
+/** Tests string assertions works properly. */
 TEST_CASE(string_test) {
     char str1[10] = "string1", str2[10] = "string!";
     ASSERT_STRING_EQUAL(str1, str2);
 }
 
+/** Main entrance point of Lukip unit testing. */
 int main() {
     LUKIP_INIT();
     MAKE_SETUP(set_up2);
