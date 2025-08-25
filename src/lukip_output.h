@@ -1,5 +1,5 @@
 /**
- * @file lukip_asserts.h
+ * @file lukip_output.h
  * @brief Header for displaying output of a Lukip unit-testing program.
  * 
  * @author Larmix
